@@ -27,13 +27,12 @@ import com.stfalcon.chatkit.commons.ImageLoader;
 public class ChatActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public enum Tabs {
+        Chat,
+        Contacts
+    }
+
     private static final String BACKSTACK_TAG = "BackStack_tag";
-    public static ImageLoader imageLoader = new ImageLoader() {
-        @Override
-        public void loadImage(ImageView imageView, String url) {
-            //TODO: image loading
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +46,7 @@ public class ChatActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.container, TabsFragment.newInstance(1)).commit();
+                fragmentManager.beginTransaction().replace(R.id.container, TabsFragment.newInstance(Tabs.Contacts)).commit();
             }
         });
 
@@ -62,7 +61,7 @@ public class ChatActivity extends AppCompatActivity
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, TabsFragment.newInstance(0));
+        transaction.replace(R.id.container, TabsFragment.newInstance(Tabs.Chat));
         transaction.commit();
     }
 
@@ -117,7 +116,7 @@ public class ChatActivity extends AppCompatActivity
         }
         try {
             if (fragmentClass == TabsFragment.class) {
-                fragment = TabsFragment.newInstance(1);
+                fragment = TabsFragment.newInstance(Tabs.Contacts);
             } else {
                 fragment = (Fragment) (fragmentClass != null ? fragmentClass.newInstance() : null);
             }

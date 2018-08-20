@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.Message;
+import com.gb.pocketmessenger.utils.ImgLoader;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
@@ -39,7 +40,7 @@ public class ChatMessages extends Fragment implements MessagesListAdapter.Select
 
         messages = view.findViewById(R.id.messagesList);
 
-        messageAdapter = new MessagesListAdapter<>(senderId, ChatActivity.imageLoader);
+        messageAdapter = new MessagesListAdapter<>(senderId, new ImgLoader());
         messages.setAdapter(messageAdapter);
 
         return view;

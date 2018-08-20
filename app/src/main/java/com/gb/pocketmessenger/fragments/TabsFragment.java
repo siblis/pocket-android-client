@@ -16,12 +16,22 @@ import com.gb.pocketmessenger.R;
 
 public class TabsFragment extends Fragment{
 
+
+
     private static final String ARG_IND = "Screen_Index";
 
-    public static TabsFragment newInstance(int index) {
+    public static TabsFragment newInstance(ChatActivity.Tabs tab) {
         TabsFragment fragment = new TabsFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_IND, index);
+        switch (tab) {
+            case Chat:
+                bundle.putInt(ARG_IND, 0);
+                break;
+            case Contacts:
+                bundle.putInt(ARG_IND, 1);
+                break;
+        }
+//        bundle.putInt(ARG_IND, index);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -30,7 +40,7 @@ public class TabsFragment extends Fragment{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 
-        int index = getArguments().getInt(ARG_IND);
+        int index = getArguments().getInt(ARG_IND, 0);
 
         View view = inflater.inflate(R.layout.fragment_tabs, container, false);
 
