@@ -91,7 +91,6 @@ public class ChatActivity extends AppCompatActivity
             return true;
         }
         return false;
-
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
