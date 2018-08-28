@@ -32,11 +32,9 @@ public class MyProfileFragment extends Fragment {
 
     private static final String CROPPED_AVATAR_FILE_NAME = "avatar_crop.jpg";
     private static final String AVATAR_FILE_NAME = "avatar.jpg";
-    private static final String USER_NAME_PREFERENCES = "user_name";
     private static final String USER_AVATAR_URI = "user_avatar_uri";
     private static final int CAMERA_REQUEST_CODE = 1001;
-    final private int REQUEST_CODE_ASK_PERMISSIONS_CAMERA = 100;
-    final private int REQUEST_CODE_ASK_PERMISSIONS_EXTERNAL_STORAGE = 200;
+
 
     private Uri avatarImageUri;
     private SharedPreferences myProfileSettings;
@@ -75,7 +73,8 @@ public class MyProfileFragment extends Fragment {
 
             File imagePath = new File(getActivity().getCacheDir(), "images");
             File filePhoto = new File(imagePath, AVATAR_FILE_NAME);
-            filePhotoPath = FileProvider.getUriForFile(getActivity().getApplicationContext(), "com.pocketmessenger.android.fileprovider", filePhoto);
+            filePhotoPath = FileProvider.getUriForFile(getActivity().getApplicationContext(),
+                    "com.pocketmessenger.android.fileprovider", filePhoto);
 
             if (filePhoto != null) {
                 photoIntent.putExtra("TEST", filePhotoPath.toString());
