@@ -13,8 +13,10 @@
 
     <string name="hint_login">Логин / Email</string>
     <string name="hint_password">Пароль</string>
+    <string name="hint_repassword">Повторите пароль</string>
     <string name="button_login">LOG IN</string>
     <string name="button_register">NEW USER</string>
+    <string name="button_newuser">CREATE</string>
 
     <string name="my_profile">Мой профиль</string>
     <string name="contacts">Контакты</string>
