@@ -101,18 +101,24 @@ public class ChatActivity extends AppCompatActivity
 
         int id = item.getItemId();
 
-        if (id == R.id.nav_my_profile) {
-            fragmentClass = MyProfileFragment.class;
-        } else if (id == R.id.nav_contacts) {
-            fragmentClass = TabsFragment.class;
-        } else if (id == R.id.nav_support) {
-            fragmentClass = SupportFragment.class;
-        } else if (id == R.id.nav_about) {
-            fragmentClass = AboutFragment.class;
-        } else if (id == R.id.nav_logout) {
-            logout();
-            return true;
+        switch (id) {
+            case R.id.nav_my_profile:
+                fragmentClass = MyProfileFragment.class;
+                break;
+            case R.id.nav_contacts:
+                fragmentClass = TabsFragment.class;
+                break;
+            case R.id.nav_support:
+                fragmentClass = SupportFragment.class;
+                break;
+            case R.id.nav_about:
+                fragmentClass = AboutFragment.class;
+                break;
+            case R.id.nav_logout:
+                logout();
+                return true;
         }
+
         try {
             if (fragmentClass == TabsFragment.class) {
                 fragment = TabsFragment.newInstance(Tabs.Contacts);
