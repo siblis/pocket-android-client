@@ -7,6 +7,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.Dialog;
@@ -18,7 +20,8 @@ import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatList extends Fragment {
+public class ChatList extends Fragment implements DialogsListAdapter.OnDialogClickListener<Dialog>,
+        DialogsListAdapter.OnDialogLongClickListener<Dialog> {
     private List<Dialog> dialogs = new ArrayList<>();
     private DialogsList chats;
     DialogsListAdapter chatListAdapter;
@@ -57,4 +60,13 @@ public class ChatList extends Fragment {
         chatListAdapter.addItem(dialog);
     }
 
+    @Override
+    public void onDialogClick(Dialog dialog) {
+        Toast.makeText(getContext(), "NJCNC", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDialogLongClick(Dialog dialog) {
+
+    }
 }

@@ -23,6 +23,11 @@
     <string name="logout">Logout</string>
 
     <string name="hint_enter_a_message">Введите сообщение</string>
+    <string name="enter_login">Введие логин</string>
+    <string name="enter_password">Введие пароль</string>
+    <string name="register">Регистрация</string>
+    <string name="cancel">Отмена</string>
+    <string name="enter_email">Введите e-mail</string>
 
 
 </resources>
