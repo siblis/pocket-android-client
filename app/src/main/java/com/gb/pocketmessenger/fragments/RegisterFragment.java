@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.gb.pocketmessenger.Network.ConnectionToServer;
 import com.gb.pocketmessenger.R;
+import com.gb.pocketmessenger.models.User;
 
 import java.util.concurrent.ExecutionException;
 
@@ -46,8 +47,9 @@ public class RegisterFragment extends Fragment {
     }
 
     private void sendRegisterData(String login, String email, String password) {
-        ConnectionToServer connection = new ConnectionToServer();
-        connection.setParams("REGISTER", login, email, password);
+        User newUser = new User(login, password);
+        newUser.seteMail(email);
+        ConnectionToServer connection = new ConnectionToServer("REGISTER", newUser);
         connection.execute(POCKET_MESSENGER_URL);
         try {
             serverResponse.setText(connection.get());

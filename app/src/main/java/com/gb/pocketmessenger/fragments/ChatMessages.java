@@ -8,11 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gb.pocketmessenger.Network.ConnectionToServer;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.Message;
 import com.gb.pocketmessenger.models.PocketMessage;
+import com.gb.pocketmessenger.models.User;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
@@ -21,25 +23,49 @@ import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
+import java.util.concurrent.ExecutionException;
+
+import static com.gb.pocketmessenger.fragments.RegisterFragment.POCKET_MESSENGER_URL;
+
 public class ChatMessages extends Fragment implements MessageInput.InputListener,
         MessageInput.AttachmentsListener,
         MessageInput.TypingListener {
 
-    private static final int TOTAL_MESSAGES_COUNT = 50;
-    public static final String POCKET_MESSENGER_URL = "https://pocketmsg.ru:8888";
-    public static final String REST_WS_CONNECT = "/v1/ws/";
     public static final String WSS_POCKETMSG = "wss://pocketmsg.ru:8888/v1/ws/";
-
-
     protected ImageLoader imageLoader;
     private MessagesList messages;
     private MessagesListAdapter<Message> messageAdapter;
     private final String senderId = "0";    //TODO: get senderID
+    private String login;
+    private String password;
 
 
     public static ChatMessages newInstance(String dialogId) {
-        //TODO: get messages
-        return new ChatMessages();
+        ChatMessages myFragment = new ChatMessages();
+
+//        Bundle args = new Bundle();
+//        args.putString("login", login);
+//        args.putString("password", password);
+//        myFragment.setArguments(args);
+
+        return myFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+//        login = getArguments().getString("login", "");
+//        password = getArguments().getString("password", "");
+//        User newUser = new User(login, password);
+//        ConnectionToServer connection = new ConnectionToServer("LOGIN", newUser);
+//        connection.execute(POCKET_MESSENGER_URL);
+//        try {
+//            Toast.makeText(getContext(), connection.get(), Toast.LENGTH_SHORT).show();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Nullable
@@ -76,11 +102,6 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
 
     private void initAdapter() {
         messageAdapter = new MessagesListAdapter<>(senderId, imageLoader);
-//        messageAdapter.enableSelectionMode((MessagesListAdapter.SelectionListener) this);//       messageAdapter.setLoadMoreListener((MessagesListAdapter.OnLoadMoreListener) this);
-//        messageAdapter.registerViewClickListener(R.id.messageUserAvatar,
-//                (view, message) -> {
-//
-//                });
         messages.setAdapter(messageAdapter);
     }
 
