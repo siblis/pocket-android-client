@@ -49,8 +49,6 @@
         android:id="@+id/server_response"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:text="ТЕСТ"
         app:layout_constraintTop_toBottomOf="@id/register_cancel_button" />
 
 </android.support.constraint.ConstraintLayout>
