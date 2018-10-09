@@ -32,6 +32,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         MessageInput.TypingListener {
 
     public static final String WSS_POCKETMSG = "wss://pocketmsg.ru:8888/v1/ws/";
+    public static final String WSS_POCKETMSG_ECHO = "wss://pocketmsg.ru:8888/v1/ws_echo/";
     protected ImageLoader imageLoader;
     private MessagesList messages;
     private MessagesListAdapter<Message> messageAdapter;

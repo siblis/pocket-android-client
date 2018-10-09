@@ -51,6 +51,7 @@ public class RegisterFragment extends Fragment {
         newUser.seteMail(email);
         ConnectionToServer connection = new ConnectionToServer("REGISTER", newUser);
         connection.execute(POCKET_MESSENGER_URL);
+        connection.sendTextOnWebsocket("HELLO");
         try {
             serverResponse.setText(connection.get());
         } catch (InterruptedException e) {

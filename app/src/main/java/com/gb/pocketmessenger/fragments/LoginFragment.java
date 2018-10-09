@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.widget.Button;
 import android.provider.Settings.Secure;
 
 import com.gb.pocketmessenger.Network.ConnectionToServer;
@@ -128,9 +127,8 @@ public class LoginFragment extends Fragment {
 
     private Boolean checkSavedUser() {
 
-        if (mPrefs.getString("user_id", "#error!").equals("#error!") || mPrefs.getString("user_pass", "#error!").equals("#error!"))
-            return false;
-        else return true;
+        return !mPrefs.getString("user_id", "#error!").equals("#error!")
+                && !mPrefs.getString("user_pass", "#error!").equals("#error!");
     }
 
     private void saveUser() {

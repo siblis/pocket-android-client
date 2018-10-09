@@ -1,6 +1,7 @@
 package com.gb.pocketmessenger.Network;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.gb.pocketmessenger.models.User;
 import com.neovisionaries.ws.client.WebSocket;
@@ -19,8 +20,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.gb.pocketmessenger.fragments.ChatMessages.WSS_POCKETMSG;
+import static com.gb.pocketmessenger.fragments.ChatMessages.WSS_POCKETMSG_ECHO;
 
 
 public class ConnectionToServer extends AsyncTask<String, Void, String> {
@@ -141,8 +146,10 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                         bos.close();
 
                         data = new String(result);
-
-                    } else  {
+                        String token = parseToken(data);
+                        
+                        getWebSocketConnection(token);
+                    } else {
                         data = "ОШИБКА ЛОГИНА";
                     }
                 } catch (MalformedURLException e) {
@@ -159,14 +166,20 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
         return data;
     }
 
-    private void getWebSocketConnection() {
+    private String parseToken(String data) {
+        String[] resultArr = data.split(" ");
+        return resultArr[3].substring(1, 17);
+    }
+
+    private void getWebSocketConnection(String token) {
         // TODO в параметр метода передаем TOKEN
-        new Thread(new Runnable() {
+        ExecutorService webSocket = Executors.newSingleThreadExecutor();
+        webSocket.submit(new Runnable() {
             @Override
             public void run() {
                 try {
-                    chatWebSocket = new WebSocketFactory().createSocket(WSS_POCKETMSG);
-                    chatWebSocket.addHeader("Token", "36a6908c783ba6e5");
+                    chatWebSocket = new WebSocketFactory().createSocket(WSS_POCKETMSG_ECHO);
+                    chatWebSocket.addHeader("Token", token);
                     chatWebSocket.addListener(new WebSocketAdapter() {
                         @Override
                         public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
@@ -175,6 +188,7 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
 
                         @Override
                         public void onTextMessage(WebSocket websocket, String text) throws Exception {
+                            Log.d("Text", text);
                         }
                     });
                     chatWebSocket.connect();
@@ -184,9 +198,9 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
     }
-
-    public void setParams(String register, User newUser) {
+    public void sendTextOnWebsocket(String text){
+        if (chatWebSocket != null) chatWebSocket.sendText("Hello");
     }
 }
