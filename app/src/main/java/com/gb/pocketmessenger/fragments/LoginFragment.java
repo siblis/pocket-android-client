@@ -22,6 +22,8 @@ import com.gb.pocketmessenger.models.User;
 
 import java.util.concurrent.ExecutionException;
 
+import se.simbio.encryption.Encryption;
+
 import static com.gb.pocketmessenger.fragments.RegisterFragment.POCKET_MESSENGER_URL;
 
 public class LoginFragment extends Fragment {
@@ -39,6 +41,8 @@ public class LoginFragment extends Fragment {
     private String mUserId;
     private String mUserPass;
     private String result = "";
+    private String mCryptoKey = "vnfjn&^6fh4673";
+    Encryption encryption;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -123,30 +127,43 @@ public class LoginFragment extends Fragment {
     }
 
     private Boolean checkSavedUser() {
-        //loadUser();
+
         if (mPrefs.getString("user_id", "#error!").equals("#error!") || mPrefs.getString("user_pass", "#error!").equals("#error!"))
             return false;
         else return true;
     }
 
     private void saveUser() {
-        mPrefs.edit().putString("user_id", mUserId).apply();
-        mPrefs.edit().putString("user_pass", mUserPass).apply();
+        String cUser = crypt(mUserId);
+        String cPass = crypt(mUserPass);
+        mPrefs.edit().putString("user_id", cUser).apply();
+        mPrefs.edit().putString("user_pass", cPass).apply();
         Log.d(TAG, "User saved!");
-        Log.d(TAG, "Prefs User_ID: " + mUserId + " User_PASS: " + mUserPass);
     }
 
     private void loadUser() {
         mUserId = mPrefs.getString("user_id", "#error!");
         mUserPass = mPrefs.getString("user_pass", "#error!");
-        Log.d(TAG, "User loaded!");
-        Log.d(TAG, "Prefs User_ID: " + mUserId + " User_PASS: " + mUserPass);
+        if (!mUserId.equals("#error!")) mUserId = decrypt(mUserId);
+        if (!mUserPass.equals("#error!")) mUserPass = decrypt(mUserPass);
     }
 
     // Для LOGOUT!
     private void deleteUser() {
         mPrefs.edit().remove("user_id").apply();
         mPrefs.edit().remove("user_pass").apply();
+    }
+
+    private String crypt(String mSring) {
+        encryption = Encryption.getDefault(mCryptoKey, mAndroidId, new byte[16]);
+        String mEncryptedString = encryption.encryptOrNull(mSring);
+        return mEncryptedString;
+    }
+
+    private String decrypt(String encryptedUser) {
+        encryption = Encryption.getDefault(mCryptoKey, mAndroidId, new byte[16]);
+        String decryptedUser = encryption.decryptOrNull(encryptedUser);
+        return decryptedUser;
     }
 
 }
