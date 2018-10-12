@@ -3,10 +3,6 @@ package com.gb.pocketmessenger.Network;
 import android.os.AsyncTask;
 
 import com.gb.pocketmessenger.models.User;
-import com.neovisionaries.ws.client.WebSocket;
-import com.neovisionaries.ws.client.WebSocketAdapter;
-import com.neovisionaries.ws.client.WebSocketException;
-import com.neovisionaries.ws.client.WebSocketFactory;
 
 import org.json.JSONObject;
 
@@ -17,14 +13,10 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import static com.gb.pocketmessenger.fragments.ChatMessages.WSS_POCKETMSG;
 
 
 public class ConnectionToServer extends AsyncTask<String, Void, String> {
-    private WebSocket chatWebSocket;
+
     private String action;
     private User user;
 
@@ -65,7 +57,6 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
         }
         switch (action) {
             case "REGISTER":
-                InputStream inputstream = null;
                 try {
                     URL url = new URL(myUrl + "/v1/users/");
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -82,18 +73,8 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     int responseCode = connection.getResponseCode();
 
                     if (responseCode == 201) {
-                        inputstream = connection.getInputStream();
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        data = getConnectionData(connection);
 
-                        int read;
-                        while ((read = inputstream.read()) != -1) {
-                            bos.write(read);
-                        }
-                        byte[] result = bos.toByteArray();
-                        bos.close();
-
-                        data = new String(result);
-// TODO получаем токен и логинимся с ним
                     } else if (responseCode == 409) {
                         data = "Такая учетная запись существует!";
                     } else if (responseCode == 400) {
@@ -104,14 +85,9 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    if (inputstream != null) {
-                        inputstream.close();
-                    }
                 }
                 return data;
             case "LOGIN":
-                InputStream loginInputStream = null;
                 try {
                     URL url = new URL(myUrl + "/v1/auth/");
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -126,67 +102,59 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     wr.flush();
                     connection.connect();
 
-                    loginInputStream = connection.getInputStream();
                     int responseCode = connection.getResponseCode();
-
                     if (responseCode == 200) {
-                        inputstream = connection.getInputStream();
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-                        int read;
-                        while ((read = inputstream.read()) != -1) {
-                            bos.write(read);
-                        }
-                        byte[] result = bos.toByteArray();
-                        bos.close();
-
-                        data = new String(result);
-
-                    } else  {
+                        data = getConnectionData(connection);
+                    } else {
                         data = "ОШИБКА ЛОГИНА";
                     }
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    if (loginInputStream != null)
-                        loginInputStream.close();
+                }
+                return data;
+            case "GET_ID":
+                try {
+                    URL url = new URL(myUrl + "/v1/users/");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setRequestProperty("Token", user.getToken());
+                    connection.connect();
 
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == 200) {
+                        data = getConnectionData(connection);
+                    } else if (responseCode == 401) {
+                        data = "НЕ УДАЛОСЬ ПОЛУЧИТЬ ID ПОЛЬЗОВАТЕЛЯ";
+                    } else if (responseCode == 404) {
+                        data = "НЕ УДАЛОСЬ ПОЛУЧИТЬ ID ПОЛЬЗОВАТЕЛЯ";
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 return data;
         }
         return data;
     }
 
-    private void getWebSocketConnection() {
-        // TODO в параметр метода передаем TOKEN
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    chatWebSocket = new WebSocketFactory().createSocket(WSS_POCKETMSG);
-                    chatWebSocket.addHeader("Token", "36a6908c783ba6e5");
-                    chatWebSocket.addListener(new WebSocketAdapter() {
-                        @Override
-                        public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
-                            super.onConnected(websocket, headers);
-                        }
+    private String getConnectionData(HttpURLConnection connection) throws IOException {
 
-                        @Override
-                        public void onTextMessage(WebSocket websocket, String text) throws Exception {
-                        }
-                    });
-                    chatWebSocket.connect();
-                } catch (WebSocketException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
+        String data;
+        InputStream inputstream = connection.getInputStream();
 
-    public void setParams(String register, User newUser) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        int read;
+        while ((read = inputstream.read()) != -1) {
+            bos.write(read);
+        }
+        byte[] result = bos.toByteArray();
+        bos.close();
+
+        data = new String(result);
+        return data;
     }
 }

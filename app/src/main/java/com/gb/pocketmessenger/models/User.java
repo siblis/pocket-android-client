@@ -7,6 +7,7 @@ public class User implements IUser {
     private String login;
     private String password;
     private String eMail;
+    private String token;
 
     public User(String login, String password) {
         this.login = login;
@@ -50,5 +51,13 @@ public class User implements IUser {
     @Override
     public String getAvatar() {
         return null;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
