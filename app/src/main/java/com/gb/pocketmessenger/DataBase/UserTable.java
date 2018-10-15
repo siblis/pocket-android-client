@@ -23,15 +23,19 @@ public class UserTable {
     @ColumnInfo(name = "token")
     private String mToken;
 
+    @ColumnInfo(name = "server_user_id")
+    private int mServerUserId;
+
     public UserTable() {
     }
 
-    public UserTable(int id, String userName, String password, String email, String token) {
+    public UserTable(int id, String userName, String password, String email, String token, int serverUserId) {
         mId = id;
         mUserName = userName;
         mPassword = password;
         mEmail = email;
         mToken = token;
+        mServerUserId = serverUserId;
     }
 
     public int getId() {
@@ -72,5 +76,13 @@ public class UserTable {
 
     public void setToken(String token) {
         mToken = token;
+    }
+
+    public int getServerUserId() {
+        return mServerUserId;
+    }
+
+    public void setServerUserId(int serverUserId) {
+        mServerUserId = serverUserId;
     }
 }

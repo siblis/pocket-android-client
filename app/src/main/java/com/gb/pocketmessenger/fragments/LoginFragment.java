@@ -55,6 +55,7 @@ public class LoginFragment extends Fragment {
     private String mUserPass;
     private String mUserEmail = "e-mail";
     private String token;
+    private int mServerUserId;
     private String result = "";
     private String mCryptoKey = "vnfjn&^6fh4673";
     private Encryption encryption;
@@ -79,7 +80,8 @@ public class LoginFragment extends Fragment {
             Log.d(TAG, "USER: " + mPocketDao.getUser().getUserName()
                     + " PASS: " + mPocketDao.getUser().getPassword()
                     + " EMAIL: " + mPocketDao.getUser().getEmail()
-                    + " TOKEN: " + mPocketDao.getUser().getToken());
+                    + " TOKEN: " + mPocketDao.getUser().getToken()
+                    + " SERVER_USER_ID: " + mPocketDao.getUser().getServerUserId());
         } else Log.d(TAG, "USER: Empty");
 
         if (!checkSavedUser()) {
@@ -120,6 +122,7 @@ public class LoginFragment extends Fragment {
         newUser.setToken(token);
         String userId = getUserId(newUser);
         mUserEmail = parseEmail(userId);
+        mServerUserId = Integer.parseInt(parseUserId(userId));
 
         if (result.contains("You logged success")) {
             saveUser();
@@ -158,6 +161,13 @@ public class LoginFragment extends Fragment {
         resultArr = resultArr[2].split("\n");
         Log.d(TAG, "parseEmail: " + resultArr[0].substring(8));
         return resultArr[0].substring(8);
+
+    }
+
+    private String parseUserId(String data) {
+        String[] resultArr = data.split(", ");
+        Log.d(TAG, "parseUserId: " + resultArr[0].substring(14));
+        return resultArr[0].substring(14);
 
     }
 
@@ -203,7 +213,7 @@ public class LoginFragment extends Fragment {
     private void saveUser() {
         String cUser = crypt(mUserId);
         String cPass = crypt(mUserPass);
-        mPocketDao.insertUser(new UserTable(0, cUser, cPass, mUserEmail, token));
+        mPocketDao.insertUser(new UserTable(0, cUser, cPass, mUserEmail, token, mServerUserId));
         Log.d(TAG, "User saved!");
     }
 
