@@ -9,10 +9,11 @@ import android.database.Cursor;
 
 import java.util.List;
 
+@Dao
 public interface PocketDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertUser(List<UserTable> users);
+    void insertUser(UserTable user);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertChats(List<ChatsTable> chats);
@@ -42,7 +43,7 @@ public interface PocketDao {
     List<ContactsTable> getUsersFromChat(int chatId);
 
     @Query("SELECT * FROM messagestable WHERE to_id = :chatOrUserId")
-    List<ContactsTable> getMessagesToId(int chatOrUserId);
+    List<MessagesTable> getMessagesToId(int chatOrUserId);
 
     @Delete
     void deleteContact(ContactsTable contactsTable);
@@ -53,7 +54,12 @@ public interface PocketDao {
     @Query("SELECT * FROM contactstable")
     List<ContactsTable> getContacts();
 
-    
+    @Delete
+    void deleteUser(UserTable userTable);
+
+    @Query("SELECT * FROM usertable WHERE id = 0")
+    UserTable getUser();
+
 
 
 }
