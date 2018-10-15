@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.gb.pocketmessenger.Utils.CircleImageView
+        <com.gb.pocketmessenger.utils.CircleImageView
             android:scaleType="centerCrop"
             android:id="@+id/my_profile_avatar"
             android:layout_width="150dp"
