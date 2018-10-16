@@ -119,6 +119,8 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     URL url = new URL(myUrl + "/v1/users/");
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
+                    connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    connection.setRequestProperty("Accept", "application/json");
                     connection.setRequestProperty("Token", user.getToken());
                     connection.connect();
 

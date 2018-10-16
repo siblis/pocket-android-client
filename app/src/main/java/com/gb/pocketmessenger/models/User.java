@@ -1,16 +1,30 @@
 package com.gb.pocketmessenger.models;
 
 
+import com.google.gson.annotations.SerializedName;
 import com.stfalcon.chatkit.commons.models.IUser;
 
 public class User implements IUser {
+
+    @SerializedName("account_name")
     private String login;
+
     private String password;
+
+    @SerializedName("email")
     private String eMail;
     private String token;
-    public String Id;
+
+    @SerializedName("uid")
+    public String id;
 
     public User() {
+    }
+
+    public User(String login, String password, String id) {
+        this.id = id;
+        this.login = login;
+        this.password = password;
     }
 
     public User(String login, String password) {
@@ -44,7 +58,7 @@ public class User implements IUser {
 
     @Override
     public String getId() {
-        return Id;
+        return id;
     }
 
     @Override

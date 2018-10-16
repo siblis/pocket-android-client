@@ -1,7 +1,13 @@
 package com.gb.pocketmessenger;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,13 +22,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.gb.pocketmessenger.fragments.AboutFragment;
 import com.gb.pocketmessenger.fragments.ChatMessages;
 import com.gb.pocketmessenger.fragments.MyProfileFragment;
 import com.gb.pocketmessenger.fragments.SupportFragment;
 import com.gb.pocketmessenger.fragments.TabsFragment;
+import com.gb.pocketmessenger.services.PocketMessengerWssService;
 import com.stfalcon.chatkit.commons.ImageLoader;
+
+import static com.gb.pocketmessenger.services.PocketMessengerWssService.TOKEN_INTENT;
 
 public class ChatActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -31,7 +41,6 @@ public class ChatActivity extends AppCompatActivity
         Chat,
         Contacts
     }
-
     public static final String BACKSTACK_TAG = "BackStack_tag";
 
     @Override
@@ -42,12 +51,9 @@ public class ChatActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.container, TabsFragment.newInstance(Tabs.Contacts)).commit();
-            }
+        fab.setOnClickListener(view -> {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.container, TabsFragment.newInstance(Tabs.Contacts)).commit();
         });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -58,6 +64,7 @@ public class ChatActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
 
         //TODO откладываем до лучших времен
 //        FragmentManager fragmentManager = getSupportFragmentManager();
@@ -140,7 +147,7 @@ public class ChatActivity extends AppCompatActivity
         return true;
     }
 
-    public static void setMessageScreen(String dialogId){
+    public static void setMessageScreen(String dialogId) {
         ChatMessages.newInstance(dialogId);
     }
 
