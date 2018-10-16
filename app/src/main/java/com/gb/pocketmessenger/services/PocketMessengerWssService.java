@@ -4,10 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.renderscript.ScriptGroup;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
+import com.gb.pocketmessenger.ChatActivity;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
@@ -23,6 +22,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static com.gb.pocketmessenger.Constants.CURRENT_SERVER;
+import static com.gb.pocketmessenger.Constants.MESSAGE_BODY;
+import static com.gb.pocketmessenger.Constants.STATUS_CONNECTED;
+import static com.gb.pocketmessenger.Constants.STATUS_DISCONNECTED;
+import static com.gb.pocketmessenger.Constants.STATUS_INCOMING_TEXT_MESSAGE;
+import static com.gb.pocketmessenger.Constants.STATUS_MESSAGE;
+import static com.gb.pocketmessenger.Constants.WEBSOCKET_MESSAGE_TAG;
 
 public class PocketMessengerWssService extends Service {
 
@@ -55,25 +60,32 @@ public class PocketMessengerWssService extends Service {
         wssThread = Executors.newSingleThreadExecutor();
         Future<?> socketResult = wssThread.submit(() -> {
             try {
-                chatWebSocket = new WebSocketFactory().createSocket(CURRENT_SERVER + "/v1/ws_echo/");
-                chatWebSocket.addHeader("Token", token);
+                chatWebSocket = new WebSocketFactory().createSocket(CURRENT_SERVER + "/v1/ws/");
+                chatWebSocket.addHeader("token", token);
                 chatWebSocket.addExtension(WebSocketExtension.PERMESSAGE_DEFLATE);
                 chatWebSocket.addListener(new WebSocketAdapter() {
                     @Override
                     public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
-                        String result = headers.toString();
                         super.onConnected(websocket, headers);
+                        Intent connected = new Intent(WEBSOCKET_MESSAGE_TAG);
+                        connected.putExtra(STATUS_MESSAGE, STATUS_CONNECTED);
+                        sendBroadcast(connected);
                     }
 
                     @Override
                     public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
                         super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
-
+                        Intent disconnected = new Intent(WEBSOCKET_MESSAGE_TAG);
+                        disconnected.putExtra(STATUS_MESSAGE, STATUS_DISCONNECTED);
+                        sendBroadcast(disconnected);
                     }
 
                     @Override
                     public void onTextMessage(WebSocket websocket, String text) {
-                        Log.d("1", "2");
+                        Intent textMessage = new Intent(WEBSOCKET_MESSAGE_TAG);
+                        textMessage.putExtra(STATUS_MESSAGE, STATUS_INCOMING_TEXT_MESSAGE);
+                        textMessage.putExtra(MESSAGE_BODY, text);
+                        sendBroadcast(textMessage);
                     }
 
                 });

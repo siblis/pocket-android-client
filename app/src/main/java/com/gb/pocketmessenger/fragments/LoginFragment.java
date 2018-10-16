@@ -1,8 +1,10 @@
 package com.gb.pocketmessenger.fragments;
 
-
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,11 +24,11 @@ import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.AppDelegate;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UserTable;
-
 import com.gb.pocketmessenger.Network.ConnectionToServer;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.services.PocketMessengerWssService;
+import com.gb.pocketmessenger.utils.JsonParser;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -35,18 +37,20 @@ import se.simbio.encryption.Encryption;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static com.gb.pocketmessenger.Constants.CURRENT_SERVER;
+import static com.gb.pocketmessenger.Constants.WEBSOCKET_MESSAGE_TAG;
 import static com.gb.pocketmessenger.services.PocketMessengerWssService.TOKEN_INTENT;
 
+
 public class LoginFragment extends Fragment {
+
+    private static Intent intent;
+    private BroadcastReceiver messageReceiver;
+    private boolean isServiceConnected;
+    private PocketMessengerWssService wssService;
 
     public static LoginFragment newInstance() {
         return new LoginFragment();
     }
-
-    private Intent intent;
-    private ServiceConnection serviceConnection;
-    private PocketMessengerWssService wssService;
-    private Boolean isServiceConnected;
 
     private EditText login;
     private EditText password;
@@ -61,7 +65,8 @@ public class LoginFragment extends Fragment {
     private String result = "";
     private String mCryptoKey = "vnfjn&^6fh4673";
     private Encryption encryption;
-    PocketDao mPocketDao;
+    private PocketDao mPocketDao;
+    private ServiceConnection serviceConnection;
 
 
     @Override
@@ -120,71 +125,43 @@ public class LoginFragment extends Fragment {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        token = parseToken(result);
+        token = JsonParser.parseToken(result);
         newUser.setToken(token);
-        String userId = getUserId(newUser);
-        mUserEmail = parseEmail(userId);
-        mServerUserId = Integer.parseInt(parseUserId(userId));
 
-        if (result.contains("You logged success")) {
+        User inServerUser = getUserInfo(newUser);
+        String nickName = inServerUser.getLogin();
+        mUserEmail = inServerUser.geteMail();
+        mServerUserId = Integer.parseInt(inServerUser.getId());
 
+        if (!token.isEmpty()) {
             if (!checkSavedUser()) saveUser();
-            if (!token.isEmpty()) bindWss(token);
-//            Deprecated
-//            loadChatMessagesFragment();
 
-            Intent intent = new Intent(getActivity(), ChatActivity.class);
-            startActivity(intent);
-
-
-            saveUser();
-            if (!token.isEmpty()) bindWss(token); //Токен может быть пустым при успешном логине?
-            loadChatMessagesFragment();
+            bindWss(token);
+            receiverInit();
 
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "You logged successfully!");
+
+            Intent intent = new Intent(getActivity(), ChatActivity.class);
+            startActivity(intent);
         } else {
             Toast.makeText(getContext(), "Incorrect Login or Password!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Incorrect Login or Password!");
         }
     }
 
-    private String getUserId(User newUser) {
-        String userID = " ";
-        ConnectionToServer connection = new ConnectionToServer("GET_ID", newUser);
-        connection.execute(CURRENT_SERVER);
-        try {
-            userID = connection.get();
-            Log.d(TAG, "getUserId: " + userID);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return userID;
+    private void receiverInit() {
+        messageReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Toast.makeText(context, "СООБЩЕНИЕ ПРИШЛО", Toast.LENGTH_SHORT).show();
+            }
+        };
+        IntentFilter intentFilter = new IntentFilter(WEBSOCKET_MESSAGE_TAG);
+        getActivity().registerReceiver(messageReceiver, intentFilter);
     }
 
-    private String parseToken(String data) {
-        String[] resultArr = data.split(" ");
-        return resultArr[3].substring(1, 17);
-    }
-
-    private String parseEmail(String data) {
-        String[] resultArr = data.split(", ");
-        resultArr = resultArr[2].split("\n");
-        Log.d(TAG, "parseEmail: " + resultArr[0].substring(8));
-        return resultArr[0].substring(8);
-
-    }
-
-    private String parseUserId(String data) {
-        String[] resultArr = data.split(", ");
-        Log.d(TAG, "parseUserId: " + resultArr[0].substring(14));
-        return resultArr[0].substring(14);
-
-    }
-
-    private void bindWss(String token) {
+    public void bindWss(String token) {
         intent = new Intent(getContext(), PocketMessengerWssService.class);
         intent.putExtra(TOKEN_INTENT, token);
         serviceConnection = new ServiceConnection() {
@@ -210,6 +187,37 @@ public class LoginFragment extends Fragment {
             }
         };
         getActivity().bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    private User getUserInfo(User newUser) {
+        String userID = " ";
+        ConnectionToServer connection = new ConnectionToServer("GET_ID", newUser);
+        connection.execute(CURRENT_SERVER);
+        try {
+            userID = connection.get();
+            Log.d(TAG, "getUserId: " + userID);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return JsonParser.parseUser(userID);
+    }
+
+
+    private String parseEmail(String data) {
+        String[] resultArr = data.split(", ");
+        resultArr = resultArr[2].split("\n");
+        Log.d(TAG, "parseEmail: " + resultArr[0].substring(8));
+        return resultArr[0].substring(8);
+
+    }
+
+    private String parseUserId(String data) {
+        String[] resultArr = data.split(", ");
+        Log.d(TAG, "parseUserId: " + resultArr[0].substring(14));
+        return resultArr[0].substring(14);
+
     }
 
     private String getDeviceId() {

@@ -9,9 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.Message;
-import com.gb.pocketmessenger.models.PocketMessage;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
@@ -104,7 +101,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
 
         //TODO : тут отправляем сообщение на сервер и сохраняем в БД
         message = new Message(input.toString());
-        message.user.Id = senderId;
+        message.user.id = senderId;
         //send
         //save to DB
         newMessage(message);
