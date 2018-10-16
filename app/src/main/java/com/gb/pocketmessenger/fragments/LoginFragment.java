@@ -18,9 +18,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.provider.Settings.Secure;
 
+import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.AppDelegate;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UserTable;
+
 import com.gb.pocketmessenger.Network.ConnectionToServer;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
@@ -125,9 +127,20 @@ public class LoginFragment extends Fragment {
         mServerUserId = Integer.parseInt(parseUserId(userId));
 
         if (result.contains("You logged success")) {
+
+            if (!checkSavedUser()) saveUser();
+            if (!token.isEmpty()) bindWss(token);
+//            Deprecated
+//            loadChatMessagesFragment();
+
+            Intent intent = new Intent(getActivity(), ChatActivity.class);
+            startActivity(intent);
+
+
             saveUser();
             if (!token.isEmpty()) bindWss(token); //Токен может быть пустым при успешном логине?
             loadChatMessagesFragment();
+
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "You logged successfully!");
         } else {
@@ -244,6 +257,7 @@ public class LoginFragment extends Fragment {
         return decryptedUser;
     }
 
+    @Deprecated
     private void loadChatMessagesFragment() {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();

@@ -7,24 +7,38 @@ import java.util.Date;
 
 public class Message implements IMessage {
     public String text;
+    public String Id;
+    public Date CreatedAt;
+    public User user;
+
+    public Message() {
+    }
+
+    public Message(String text) {
+        this.text = text;
+        this.Id = Integer.toString((int)Math.random()*1000000000);  //TODO: сделать генерацию ID нормально
+        this.CreatedAt = new Date();
+        this.user = new User();
+    }
+
 
     @Override
     public String getId() {
-        return null;
+        return Id;
     }
 
     @Override
     public String getText() {
-        return null;
+        return text;
     }
 
     @Override
     public IUser getUser() {
-        return null;
+        return user;
     }
 
     @Override
     public Date getCreatedAt() {
-        return null;
+        return CreatedAt;
     }
 }
