@@ -18,11 +18,15 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.provider.Settings.Secure;
 
+import com.gb.pocketmessenger.AppDelegate;
+import com.gb.pocketmessenger.DataBase.PocketDao;
+import com.gb.pocketmessenger.DataBase.UserTable;
 import com.gb.pocketmessenger.Network.ConnectionToServer;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.services.PocketMessengerWssService;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import se.simbio.encryption.Encryption;
@@ -49,9 +53,14 @@ public class LoginFragment extends Fragment {
     private String mAndroidId;
     private String mUserId;
     private String mUserPass;
+    private String mUserEmail = "e-mail";
+    private String token;
+    private int mServerUserId;
     private String result = "";
     private String mCryptoKey = "vnfjn&^6fh4673";
     private Encryption encryption;
+    PocketDao mPocketDao;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,11 +70,19 @@ public class LoginFragment extends Fragment {
         mAndroidId = getDeviceId();
         Log.d(TAG, "Device ID: " + mAndroidId);
         mPrefs = getContext().getSharedPreferences("com.gb.pocketmessenger.PREFERENCE", getContext().MODE_PRIVATE);
+        mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
 
         //TODO Раскомментируйте следующую строку для LOGOUT. После создания макета будет привязано к кнопке logout.
         //deleteUser();
 
-        loadUser();
+        if (checkSavedUser()) {
+            loadUser();
+            Log.d(TAG, "USER: " + mPocketDao.getUser().getUserName()
+                    + " PASS: " + mPocketDao.getUser().getPassword()
+                    + " EMAIL: " + mPocketDao.getUser().getEmail()
+                    + " TOKEN: " + mPocketDao.getUser().getToken()
+                    + " SERVER_USER_ID: " + mPocketDao.getUser().getServerUserId());
+        } else Log.d(TAG, "USER: Empty");
 
         if (!checkSavedUser()) {
 
@@ -95,17 +112,21 @@ public class LoginFragment extends Fragment {
         connection.execute(CURRENT_SERVER);
         try {
             result = connection.get();
-            Log.d(TAG, "authentication: " + result);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        String token = parseToken(result);
+        token = parseToken(result);
         newUser.setToken(token);
+        String userId = getUserId(newUser);
+        mUserEmail = parseEmail(userId);
+        mServerUserId = Integer.parseInt(parseUserId(userId));
+
         if (result.contains("You logged success")) {
-            if (!checkSavedUser()) saveUser();
-            if (!token.isEmpty()) bindWss(token);
+            saveUser();
+            if (!token.isEmpty()) bindWss(token); //Токен может быть пустым при успешном логине?
             loadChatMessagesFragment();
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "You logged successfully!");
@@ -113,8 +134,6 @@ public class LoginFragment extends Fragment {
             Toast.makeText(getContext(), "Incorrect Login or Password!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Incorrect Login or Password!");
         }
-
-        String userId = getUserId(newUser);
     }
 
     private String getUserId(User newUser) {
@@ -122,7 +141,8 @@ public class LoginFragment extends Fragment {
         ConnectionToServer connection = new ConnectionToServer("GET_ID", newUser);
         connection.execute(CURRENT_SERVER);
         try {
-            userID   = connection.get();
+            userID = connection.get();
+            Log.d(TAG, "getUserId: " + userID);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -134,6 +154,21 @@ public class LoginFragment extends Fragment {
     private String parseToken(String data) {
         String[] resultArr = data.split(" ");
         return resultArr[3].substring(1, 17);
+    }
+
+    private String parseEmail(String data) {
+        String[] resultArr = data.split(", ");
+        resultArr = resultArr[2].split("\n");
+        Log.d(TAG, "parseEmail: " + resultArr[0].substring(8));
+        return resultArr[0].substring(8);
+
+    }
+
+    private String parseUserId(String data) {
+        String[] resultArr = data.split(", ");
+        Log.d(TAG, "parseUserId: " + resultArr[0].substring(14));
+        return resultArr[0].substring(14);
+
     }
 
     private void bindWss(String token) {
@@ -170,31 +205,31 @@ public class LoginFragment extends Fragment {
     }
 
     private Boolean checkSavedUser() {
-
-        return !mPrefs.getString("user_id", "#error!").equals("#error!")
-                && !mPrefs.getString("user_pass", "#error!").equals("#error!");
+        if (mPocketDao.getUser() != null)
+            return true;
+        else return false;
     }
 
     private void saveUser() {
         String cUser = crypt(mUserId);
         String cPass = crypt(mUserPass);
-        mPrefs.edit().putString("user_id", cUser).apply();
-        mPrefs.edit().putString("user_pass", cPass).apply();
+        mPocketDao.insertUser(new UserTable(0, cUser, cPass, mUserEmail, token, mServerUserId));
         Log.d(TAG, "User saved!");
     }
 
     private void loadUser() {
-        mUserId = mPrefs.getString("user_id", "#error!");
-        mUserPass = mPrefs.getString("user_pass", "#error!");
-        if (!mUserId.equals("#error!")) mUserId = decrypt(mUserId);
-        if (!mUserPass.equals("#error!")) mUserPass = decrypt(mUserPass);
+        if (checkSavedUser()) {
+            mUserId = mPocketDao.getUser().getUserName();
+            mUserPass = mPocketDao.getUser().getPassword();
+            mUserId = decrypt(mUserId);
+            mUserPass = decrypt(mUserPass);
+        } else Log.d(TAG, "loadUser: ERROR, NO USER!");
     }
 
     // Для LOGOUT!
-
     private void deleteUser() {
-        mPrefs.edit().remove("user_id").apply();
-        mPrefs.edit().remove("user_pass").apply();
+        if (mPocketDao.getUser() != null)
+            mPocketDao.deleteUser(mPocketDao.getUser());
     }
 
     private String crypt(String mSring) {
