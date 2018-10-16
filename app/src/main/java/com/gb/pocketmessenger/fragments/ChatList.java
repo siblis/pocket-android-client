@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +34,13 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ChatActivity.setMessageScreen("0");
+
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
         chats = view.findViewById(R.id.chatList);
 
         chatListAdapter = new DialogsListAdapter<>(new ImgLoader());
+
         chatListAdapter.setItems(dialogs);
 
         chatListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {

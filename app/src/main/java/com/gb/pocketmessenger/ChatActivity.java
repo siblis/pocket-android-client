@@ -32,7 +32,7 @@ public class ChatActivity extends AppCompatActivity
         Contacts
     }
 
-    private static final String BACKSTACK_TAG = "BackStack_tag";
+    public static final String BACKSTACK_TAG = "BackStack_tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +59,15 @@ public class ChatActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //TODO откладываем до лучших времен
+//        FragmentManager fragmentManager = getSupportFragmentManager();
+//        FragmentTransaction transaction = fragmentManager.beginTransaction();
+//        transaction.replace(R.id.container, TabsFragment.newInstance(Tabs.Chat));
+//        transaction.commit();
+
+        // и сразу вызаваем фрагмент для написания сообщений
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, TabsFragment.newInstance(Tabs.Chat));
-        transaction.commit();
+        fragmentManager.beginTransaction().replace(R.id.container, ChatMessages.newInstance("0")).addToBackStack(BACKSTACK_TAG).commit();
     }
 
     @Override
@@ -140,7 +145,7 @@ public class ChatActivity extends AppCompatActivity
     }
 
     private void logout() {
-        
+
         //TODO logout method
     }
 }

@@ -8,6 +8,10 @@ public class User implements IUser {
     private String password;
     private String eMail;
     private String token;
+    public String Id;
+
+    public User() {
+    }
 
     public User(String login, String password) {
         this.login = login;
@@ -40,7 +44,7 @@ public class User implements IUser {
 
     @Override
     public String getId() {
-        return null;
+        return Id;
     }
 
     @Override

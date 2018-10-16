@@ -24,6 +24,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     protected ImageLoader imageLoader;
     private MessagesList messages;
     private MessagesListAdapter<Message> messageAdapter;
+    private Message message;
     private final String senderId = "0";    //TODO: get senderID
     private String login;
     private String password;
@@ -101,13 +102,19 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     @Override
     public boolean onSubmit(CharSequence input) {
 
+        //TODO : тут отправляем сообщение на сервер и сохраняем в БД
+        message = new Message(input.toString());
+        message.user.Id = senderId;
+        //send
+        //save to DB
+        newMessage(message);
         return true;
     }
 
-    private String getMessage(CharSequence input, String receiver) {
-        PocketMessage message = new PocketMessage(receiver, input.toString());
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
-        return gson.toJson(message);
-    }
+//    private String getMessage(CharSequence input, String receiver) {
+//        PocketMessage message = new PocketMessage(receiver, input.toString());
+//        GsonBuilder builder = new GsonBuilder();
+//        Gson gson = builder.create();
+//        return gson.toJson(message);
+//    }
 }

@@ -8,9 +8,13 @@ import java.util.List;
 
 public class Dialog implements IDialog {
 
+    public String Id;
+    public String DialogName;
+
+
     @Override
     public String getId() {
-        return null;
+        return Id;
     }
 
     @Override
@@ -20,7 +24,7 @@ public class Dialog implements IDialog {
 
     @Override
     public String getDialogName() {
-        return null;
+        return DialogName;
     }
 
     @Override
