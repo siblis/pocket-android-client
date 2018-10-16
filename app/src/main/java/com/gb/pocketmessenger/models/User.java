@@ -63,7 +63,7 @@ public class User implements IUser {
 
     @Override
     public String getName() {
-        return null;
+        return login;
     }
 
     @Override
