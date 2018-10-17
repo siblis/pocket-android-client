@@ -9,9 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.Message;
-import com.gb.pocketmessenger.models.PocketMessage;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
@@ -24,6 +21,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     protected ImageLoader imageLoader;
     private MessagesList messages;
     private MessagesListAdapter<Message> messageAdapter;
+    private Message message;
     private final String senderId = "0";    //TODO: get senderID
     private String login;
     private String password;
@@ -101,13 +99,19 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     @Override
     public boolean onSubmit(CharSequence input) {
 
+        //TODO : тут отправляем сообщение на сервер и сохраняем в БД
+        message = new Message(input.toString());
+        message.user.id = senderId;
+        //send
+        //save to DB
+        newMessage(message);
         return true;
     }
 
-    private String getMessage(CharSequence input, String receiver) {
-        PocketMessage message = new PocketMessage(receiver, input.toString());
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
-        return gson.toJson(message);
-    }
+//    private String getMessage(CharSequence input, String receiver) {
+//        PocketMessage message = new PocketMessage(receiver, input.toString());
+//        GsonBuilder builder = new GsonBuilder();
+//        Gson gson = builder.create();
+//        return gson.toJson(message);
+//    }
 }
