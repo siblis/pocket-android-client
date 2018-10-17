@@ -67,14 +67,15 @@ public class ChatActivity extends AppCompatActivity
 
 
         //TODO откладываем до лучших времен
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        FragmentTransaction transaction = fragmentManager.beginTransaction();
-//        transaction.replace(R.id.container, TabsFragment.newInstance(Tabs.Chat));
-//        transaction.commit();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.container, TabsFragment.newInstance(Tabs.Chat));
+        transaction.commit();
 
         // и сразу вызаваем фрагмент для написания сообщений
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.container, ChatMessages.newInstance("0")).addToBackStack(BACKSTACK_TAG).commit();
+//        fab.setVisibility(View.INVISIBLE);
+//        FragmentManager fragmentManager = getSupportFragmentManager();
+//        fragmentManager.beginTransaction().replace(R.id.container, ChatMessages.newInstance("0")).addToBackStack(BACKSTACK_TAG).commit();
     }
 
     @Override
