@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.fragments.AboutFragment;
 import com.gb.pocketmessenger.fragments.ChatMessages;
 import com.gb.pocketmessenger.fragments.MyProfileFragment;
@@ -31,6 +32,8 @@ import com.gb.pocketmessenger.fragments.SupportFragment;
 import com.gb.pocketmessenger.fragments.TabsFragment;
 import com.gb.pocketmessenger.services.PocketMessengerWssService;
 import com.stfalcon.chatkit.commons.ImageLoader;
+
+import java.util.Objects;
 
 import static com.gb.pocketmessenger.services.PocketMessengerWssService.TOKEN_INTENT;
 
@@ -41,12 +44,17 @@ public class ChatActivity extends AppCompatActivity
         Chat,
         Contacts
     }
+
     public static final String BACKSTACK_TAG = "BackStack_tag";
+    private PocketDao mPocketDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        mPocketDao = ((AppDelegate) getApplicationContext()).getPocketDatabase().getPocketDao();
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -153,7 +161,9 @@ public class ChatActivity extends AppCompatActivity
     }
 
     private void logout() {
+        if (mPocketDao.getUser() != null)
+            mPocketDao.deleteUser(mPocketDao.getUser());
+        super.onBackPressed();
 
-        //TODO logout method
     }
 }
