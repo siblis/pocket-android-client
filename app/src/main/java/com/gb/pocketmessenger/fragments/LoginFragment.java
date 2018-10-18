@@ -140,6 +140,9 @@ public class LoginFragment extends Fragment {
             receiverInit();
 
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
+
+            Log.d(TAG, "result: " + result);
+            Log.d(TAG, "token: " + token);
             Log.d(TAG, "You logged successfully!");
 
             Intent intent = new Intent(getActivity(), ChatActivity.class);
