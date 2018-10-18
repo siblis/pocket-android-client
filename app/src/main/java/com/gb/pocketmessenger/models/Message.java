@@ -10,6 +10,7 @@ public class Message implements IMessage {
     public String Id;
     public Date CreatedAt;
     public User user;
+    public String receiver;
 
     public Message() {
     }
