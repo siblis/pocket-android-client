@@ -7,8 +7,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.gb.pocketmessenger.Network.WssConnector;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.Message;
+import com.gb.pocketmessenger.utils.JsonParser;
 import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
@@ -16,7 +20,7 @@ import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 public class ChatMessages extends Fragment implements MessageInput.InputListener,
         MessageInput.AttachmentsListener,
-        MessageInput.TypingListener {
+        MessageInput.TypingListener, WssConnector.OnIncomingMessage {
 
     protected ImageLoader imageLoader;
     private MessagesList messages;
@@ -25,6 +29,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     private final String senderId = "0";    //TODO: get senderID
     private String login;
     private String password;
+    private WssConnector connector;
 
 
     public static ChatMessages newInstance(String dialogId) {
@@ -41,6 +46,8 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        connector = WssConnector.getInstance();
+        connector.setOnIncomingMessageListener(this);
 //        login = getArguments().getString("login", "");
 //        password = getArguments().getString("password", "");
 //        User newUser = new User(login, password);
@@ -102,16 +109,20 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         //TODO : тут отправляем сообщение на сервер и сохраняем в БД
         message = new Message(input.toString());
         message.user.id = senderId;
+        message.receiver = "321";
+        if (connector != null)
+            connector.sendMessage(JsonParser.getWssMessage(message));
+        else Toast.makeText(getContext(), "Ошибка отправки сообщения", Toast.LENGTH_SHORT).show();
         //send
         //save to DB
         newMessage(message);
         return true;
     }
 
-//    private String getMessage(CharSequence input, String receiver) {
-//        PocketMessage message = new PocketMessage(receiver, input.toString());
-//        GsonBuilder builder = new GsonBuilder();
-//        Gson gson = builder.create();
-//        return gson.toJson(message);
-//    }
+    @Override
+    public void onIncomingMessage(String receiverId, String incomingMessage) {
+        Message newMessage = new Message(incomingMessage);
+        newMessage.user.id = receiverId;
+        newMessage(newMessage);
+    }
 }

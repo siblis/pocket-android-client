@@ -6,7 +6,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.gb.pocketmessenger.ChatActivity;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
@@ -53,14 +52,14 @@ public class PocketMessengerWssService extends Service {
     public IBinder onBind(Intent intent) {
         token = intent.getStringExtra(TOKEN_INTENT);
         startWssConnection(token);
-        return null;
+        return new MyBinder();
     }
 
     private void startWssConnection(String token) {
         wssThread = Executors.newSingleThreadExecutor();
         Future<?> socketResult = wssThread.submit(() -> {
             try {
-                chatWebSocket = new WebSocketFactory().createSocket(CURRENT_SERVER + "/v1/ws/");
+                chatWebSocket = new WebSocketFactory().createSocket(CURRENT_SERVER + "/v1/ws_echo/");
                 chatWebSocket.addHeader("token", token);
                 chatWebSocket.addExtension(WebSocketExtension.PERMESSAGE_DEFLATE);
                 chatWebSocket.addListener(new WebSocketAdapter() {
@@ -96,5 +95,10 @@ public class PocketMessengerWssService extends Service {
                 e.printStackTrace();
             }
         });
+    }
+
+    public void sendMessage(String message) {
+        if (chatWebSocket != null)
+            chatWebSocket.sendText(message);
     }
 }
