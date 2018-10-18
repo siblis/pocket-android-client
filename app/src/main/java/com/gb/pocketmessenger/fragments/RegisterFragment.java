@@ -2,7 +2,9 @@ package com.gb.pocketmessenger.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -55,9 +57,8 @@ public class RegisterFragment extends Fragment {
         registerButton = view.findViewById(R.id.register_ok_button);
         cancelButton = view.findViewById(R.id.register_cancel_button);
 
-        loginEditText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
+        loginEditText.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
                 if (Correct.containsWhiteSpace(loginEditText.getText().toString()) || loginEditText.getText().toString().length() == 0)
                     loginIndex = 0;
                 else loginIndex = 1;
@@ -77,13 +78,18 @@ public class RegisterFragment extends Fragment {
 
                 Log.d("tar", "Login: " + loginIndex);
 
-                return false;
+
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         });
 
-        passwordEditText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
+        passwordEditText.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
                 pswdIndex = Correct.pswCheck(passwordEditText.getText().toString());
                 switch (pswdIndex) {
                     case 0:
@@ -111,14 +117,17 @@ public class RegisterFragment extends Fragment {
                 }
 
                 Log.d("tar", "Password: " + pswdIndex);
-                return false;
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         });
 
-        emailEditText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-
+        emailEditText.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
                 if (Correct.isValidEmail(emailEditText.getText().toString())) emailIndex = 1;
                 else emailIndex = 0;
 
@@ -136,8 +145,12 @@ public class RegisterFragment extends Fragment {
                 }
 
                 Log.d("tar", "Email: " + emailIndex);
+            }
 
-                return false;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         });
 
