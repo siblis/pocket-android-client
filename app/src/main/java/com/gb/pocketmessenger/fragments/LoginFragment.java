@@ -25,9 +25,9 @@ import com.gb.pocketmessenger.AppDelegate;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UserTable;
 import com.gb.pocketmessenger.Network.ConnectionToServer;
+import com.gb.pocketmessenger.Network.WssConnector;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
-import com.gb.pocketmessenger.services.PocketMessengerWssService;
 import com.gb.pocketmessenger.utils.JsonParser;
 
 import java.util.Objects;
@@ -37,16 +37,12 @@ import se.simbio.encryption.Encryption;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static com.gb.pocketmessenger.Constants.CURRENT_SERVER;
+import static com.gb.pocketmessenger.Constants.MESSAGE_BODY;
 import static com.gb.pocketmessenger.Constants.WEBSOCKET_MESSAGE_TAG;
 import static com.gb.pocketmessenger.services.PocketMessengerWssService.TOKEN_INTENT;
 
 
 public class LoginFragment extends Fragment {
-
-    private static Intent intent;
-    private BroadcastReceiver messageReceiver;
-    private boolean isServiceConnected;
-    private PocketMessengerWssService wssService;
 
     public static LoginFragment newInstance() {
         return new LoginFragment();
@@ -66,7 +62,7 @@ public class LoginFragment extends Fragment {
     private String mCryptoKey = "vnfjn&^6fh4673";
     private Encryption encryption;
     private PocketDao mPocketDao;
-    private ServiceConnection serviceConnection;
+    private WssConnector connector;
 
 
     @Override
@@ -78,6 +74,7 @@ public class LoginFragment extends Fragment {
         Log.d(TAG, "Device ID: " + mAndroidId);
         mPrefs = getContext().getSharedPreferences("com.gb.pocketmessenger.PREFERENCE", getContext().MODE_PRIVATE);
         mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
+        connector = WssConnector.getInstance();
 
         //TODO Раскомментируйте следующую строку для LOGOUT. После создания макета будет привязано к кнопке logout.
         //deleteUser();
@@ -127,7 +124,7 @@ public class LoginFragment extends Fragment {
         }
         token = JsonParser.parseToken(result);
         newUser.setToken(token);
-
+        connector.bindWss(token);
         User inServerUser = getUserInfo(newUser);
         String nickName = inServerUser.getLogin();
         mUserEmail = inServerUser.geteMail();
@@ -136,60 +133,19 @@ public class LoginFragment extends Fragment {
         if (!token.isEmpty()) {
             if (!checkSavedUser()) saveUser();
 
-            bindWss(token);
-            receiverInit();
-
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
 
             Log.d(TAG, "result: " + result);
             Log.d(TAG, "token: " + token);
             Log.d(TAG, "You logged successfully!");
 
-            Intent intent = new Intent(getActivity(), ChatActivity.class);
-            startActivity(intent);
+//            Intent intent = new Intent(getActivity(), ChatActivity.class);
+//            startActivity(intent);
+            loadChatMessagesFragment();
         } else {
             Toast.makeText(getContext(), "Incorrect Login or Password!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Incorrect Login or Password!");
         }
-    }
-
-    private void receiverInit() {
-        messageReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Toast.makeText(context, "СООБЩЕНИЕ ПРИШЛО", Toast.LENGTH_SHORT).show();
-            }
-        };
-        IntentFilter intentFilter = new IntentFilter(WEBSOCKET_MESSAGE_TAG);
-        getActivity().registerReceiver(messageReceiver, intentFilter);
-    }
-
-    public void bindWss(String token) {
-        intent = new Intent(getContext(), PocketMessengerWssService.class);
-        intent.putExtra(TOKEN_INTENT, token);
-        serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                isServiceConnected = true;
-                Toast.makeText(getContext(), "Wss Service Started", Toast.LENGTH_SHORT).show();
-                wssService = ((PocketMessengerWssService.MyBinder) service).getService();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                Toast.makeText(getContext(), "Wss Service Stopped", Toast.LENGTH_SHORT).show();
-
-                isServiceConnected = false;
-            }
-
-            @Override
-            public void onBindingDied(ComponentName name) {
-                Toast.makeText(getContext(), "Wss Service Broken", Toast.LENGTH_SHORT).show();
-
-                isServiceConnected = false;
-            }
-        };
-        getActivity().bindService(intent, serviceConnection, BIND_AUTO_CREATE);
     }
 
     private User getUserInfo(User newUser) {
@@ -208,30 +164,13 @@ public class LoginFragment extends Fragment {
     }
 
 
-    private String parseEmail(String data) {
-        String[] resultArr = data.split(", ");
-        resultArr = resultArr[2].split("\n");
-        Log.d(TAG, "parseEmail: " + resultArr[0].substring(8));
-        return resultArr[0].substring(8);
-
-    }
-
-    private String parseUserId(String data) {
-        String[] resultArr = data.split(", ");
-        Log.d(TAG, "parseUserId: " + resultArr[0].substring(14));
-        return resultArr[0].substring(14);
-
-    }
-
     private String getDeviceId() {
         return Secure.getString(getContext().getContentResolver(),
                 Secure.ANDROID_ID);
     }
 
     private Boolean checkSavedUser() {
-        if (mPocketDao.getUser() != null)
-            return true;
-        else return false;
+        return mPocketDao.getUser() != null;
     }
 
     private void saveUser() {
