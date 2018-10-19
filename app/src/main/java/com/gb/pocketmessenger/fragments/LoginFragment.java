@@ -77,7 +77,7 @@ public class LoginFragment extends Fragment {
         connector = WssConnector.getInstance();
 
         //TODO Раскомментируйте следующую строку для LOGOUT. После создания макета будет привязано к кнопке logout.
-        //deleteUser();
+        deleteUser();
 
         if (checkSavedUser()) {
             loadUser();
@@ -122,15 +122,20 @@ public class LoginFragment extends Fragment {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "result: " + result);
         token = JsonParser.parseToken(result);
-        newUser.setToken(token);
-        connector.bindWss(token);
-        User inServerUser = getUserInfo(newUser);
-        String nickName = inServerUser.getLogin();
-        mUserEmail = inServerUser.geteMail();
-        mServerUserId = Integer.parseInt(inServerUser.getId());
+        Log.d(TAG, "token: " + token);
 
-        if (!token.isEmpty()) {
+
+        if (token != null) {
+
+            newUser.setToken(token);
+            connector.bindWss(token);
+            User inServerUser = getUserInfo(newUser);
+            String nickName = inServerUser.getLogin();
+            mUserEmail = inServerUser.geteMail();
+            mServerUserId = Integer.parseInt(inServerUser.getId());
+
             if (!checkSavedUser()) saveUser();
 
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
