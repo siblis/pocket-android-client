@@ -16,8 +16,10 @@ public class JsonParser {
 
     public static String parseToken(String tokenJson) {
         Gson gson = new GsonBuilder().create();
+        if (!tokenJson.equals("ОШИБКА ЛОГИНА")) {
         Token token = gson.fromJson(tokenJson, Token.class);
         return token.getToken();
+        } else return null;
     }
 
     public static User parseUser(String userInfo){
