@@ -67,7 +67,7 @@ public class ChatActivity extends AppCompatActivity
         setContentView(R.layout.activity_chat);
 
         mPocketDao = ((AppDelegate) getApplicationContext()).getPocketDatabase().getPocketDao();
-        Log.d(TAG, "Size: " + mPocketDao.getContacts().size());
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -91,6 +91,7 @@ public class ChatActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.container, TabsFragment.newInstance(Tabs.Chat));
+        transaction.addToBackStack(null);
         transaction.commit();
 
         // и сразу вызаваем фрагмент для написания сообщений

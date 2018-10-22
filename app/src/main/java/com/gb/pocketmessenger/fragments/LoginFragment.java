@@ -26,6 +26,7 @@ import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UserTable;
 import com.gb.pocketmessenger.Network.ConnectionToServer;
+import com.gb.pocketmessenger.Network.RestUtils;
 import com.gb.pocketmessenger.Network.WssConnector;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
@@ -36,12 +37,7 @@ import java.util.concurrent.ExecutionException;
 
 import se.simbio.encryption.Encryption;
 
-import static android.content.Context.BIND_AUTO_CREATE;
-import static com.gb.pocketmessenger.Constants.CURRENT_SERVER;
-import static com.gb.pocketmessenger.Constants.MESSAGE_BODY;
-import static com.gb.pocketmessenger.Constants.WEBSOCKET_MESSAGE_TAG;
-import static com.gb.pocketmessenger.services.PocketMessengerWssService.TOKEN_INTENT;
-
+import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE;
 
 public class LoginFragment extends Fragment {
 
@@ -112,27 +108,16 @@ public class LoginFragment extends Fragment {
 
     //TODO REFACTOR
     private void authentication(String login, String password) {
-        User newUser = new User(login, password);
-        ConnectionToServer connection = new ConnectionToServer("LOGIN", newUser);
-        connection.execute(CURRENT_SERVER);
-        try {
-            result = connection.get();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, "result: " + result);
-        token = JsonParser.parseToken(result);
-        Log.d(TAG, "token: " + token);
-
+        User user = new User(login, password);
+        String token = RestUtils.login(user, mPocketDao);
 
         if (token != null) {
 
-            newUser.setToken(token);
+            user.setToken(token);
             connector.bindWss(token);
-            User inServerUser = getUserInfo(newUser);
+
+            User inServerUser = RestUtils.getUserInfo(user, mPocketDao);
+
             String nickName = inServerUser.getLogin();
             mUserEmail = inServerUser.geteMail();
             mServerUserId = Integer.parseInt(inServerUser.getId());
@@ -141,34 +126,15 @@ public class LoginFragment extends Fragment {
 
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
 
-            Log.d(TAG, "result: " + result);
-            Log.d(TAG, "token: " + token);
-            Log.d(TAG, "You logged successfully!");
+//            Intent intent = new Intent(getActivity(), ChatActivity.class);
+//            startActivity(intent);
 
-            Intent intent = new Intent(getActivity(), ChatActivity.class);
-            startActivity(intent);
-            //loadChatMessagesFragment();
+            loadChatMessagesFragment();
         } else {
             Toast.makeText(getContext(), "Incorrect Login or Password!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Incorrect Login or Password!");
         }
     }
-
-    private User getUserInfo(User newUser) {
-        String userID = " ";
-        ConnectionToServer connection = new ConnectionToServer("GET_ID", newUser);
-        connection.execute(CURRENT_SERVER);
-        try {
-            userID = connection.get();
-            Log.d(TAG, "getUserId: " + userID);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return JsonParser.parseUser(userID);
-    }
-
 
     private String getDeviceId() {
         return Secure.getString(getContext().getContentResolver(),
@@ -183,7 +149,6 @@ public class LoginFragment extends Fragment {
         String cUser = crypt(mUserId);
         String cPass = crypt(mUserPass);
         mPocketDao.insertUser(new UserTable(0, cUser, cPass, mUserEmail, token, mServerUserId));
-        mPocketDao.insertContact(new ContactsTable(mServerUserId, mUserId, mUserEmail, true));
         Log.d(TAG, "User saved!");
     }
 
@@ -230,6 +195,8 @@ public class LoginFragment extends Fragment {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.login_container, new RegisterFragment());
+        transaction.addToBackStack(null);
+        transaction.setTransition(TRANSIT_FRAGMENT_FADE);
         transaction.commit();
     }
 
