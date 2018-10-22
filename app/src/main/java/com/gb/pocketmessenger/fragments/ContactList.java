@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -21,11 +22,12 @@ import com.gb.pocketmessenger.R;
 
 import java.util.Objects;
 
-public class ContactList extends Fragment {
+public class ContactList extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private RecyclerView mContactsRecycler;
     private final ContactsAdapter mContactsAdapter = new ContactsAdapter();
     private PocketDao mPocketDao;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public static ContactList newInstance() {
         return new ContactList();
@@ -42,6 +44,8 @@ public class ContactList extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         mContactsRecycler = view.findViewById(R.id.contacts_recycler);
+        mSwipeRefreshLayout = view.findViewById(R.id.contacts_refresher);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
     }
 
     @Override
@@ -54,5 +58,13 @@ public class ContactList extends Fragment {
 
     public void adapterReload() {
         mContactsAdapter.reload();
+    }
+
+    @Override
+    public void onRefresh() {
+        mContactsAdapter.addData(mPocketDao.getContacts());
+        if(mSwipeRefreshLayout.isRefreshing()) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
     }
 }

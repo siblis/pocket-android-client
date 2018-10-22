@@ -128,8 +128,8 @@ public class ChatActivity extends AppCompatActivity
 
             case R.id.action_add_contact:
                 addContact();
-                ContactList cl = new ContactList();
-                cl.adapterReload();
+                //ContactList cl = new ContactList();
+                //cl.onRefresh();
                 return true;
 
             case R.id.action_add_chat:
