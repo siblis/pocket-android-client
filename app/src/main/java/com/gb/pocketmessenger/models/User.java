@@ -32,6 +32,10 @@ public class User implements IUser {
         this.password = password;
     }
 
+    public User(String email) {
+        this.eMail = email;
+    }
+
     public String getLogin() {
         return login;
     }
