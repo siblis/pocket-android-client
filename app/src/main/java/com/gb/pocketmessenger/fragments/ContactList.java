@@ -23,9 +23,9 @@ import java.util.Objects;
 
 public class ContactList extends Fragment {
 
-    //private RecyclerView mContactsRecycler;
-    //private final ContactsAdapter mContactsAdapter = new ContactsAdapter();
-    //private PocketDao mPocketDao;
+    private RecyclerView mContactsRecycler;
+    private final ContactsAdapter mContactsAdapter = new ContactsAdapter();
+    private PocketDao mPocketDao;
 
     public static ContactList newInstance() {
         return new ContactList();
@@ -34,21 +34,25 @@ public class ContactList extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        //mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
+        mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
         View view = inflater.inflate(R.layout.fragment_contact_list, container, false);
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        //mContactsRecycler = view.findViewById(R.id.contacts_recycler);
+        mContactsRecycler = view.findViewById(R.id.contacts_recycler);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        //mContactsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        //mContactsRecycler.setAdapter(mContactsAdapter);
-        //mContactsAdapter.addData(mPocketDao.getContacts());
+        mContactsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mContactsRecycler.setAdapter(mContactsAdapter);
+        mContactsAdapter.addData(mPocketDao.getContacts());
+    }
+
+    public void adapterReload() {
+        mContactsAdapter.reload();
     }
 }

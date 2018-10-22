@@ -41,4 +41,8 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactHolder> {
         mContactsList = contactsTable;
         notifyDataSetChanged();
     }
+
+    public void reload() {
+        notifyDataSetChanged();
+    }
 }

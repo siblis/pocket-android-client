@@ -29,11 +29,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.gb.pocketmessenger.Adapters.ContactsAdapter;
 import com.gb.pocketmessenger.DataBase.ChatsTable;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.fragments.AboutFragment;
 import com.gb.pocketmessenger.fragments.ChatMessages;
+import com.gb.pocketmessenger.fragments.ContactList;
 import com.gb.pocketmessenger.fragments.MyProfileFragment;
 import com.gb.pocketmessenger.fragments.SupportFragment;
 import com.gb.pocketmessenger.fragments.TabsFragment;
@@ -65,7 +67,7 @@ public class ChatActivity extends AppCompatActivity
         setContentView(R.layout.activity_chat);
 
         mPocketDao = ((AppDelegate) getApplicationContext()).getPocketDatabase().getPocketDao();
-
+        Log.d(TAG, "Size: " + mPocketDao.getContacts().size());
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -126,6 +128,8 @@ public class ChatActivity extends AppCompatActivity
 
             case R.id.action_add_contact:
                 addContact();
+                ContactList cl = new ContactList();
+                cl.adapterReload();
                 return true;
 
             case R.id.action_add_chat:
@@ -214,7 +218,8 @@ public class ChatActivity extends AppCompatActivity
             public void onClick(View v) {
                 if (!mEmail.getText().toString().isEmpty() && Correct.isValidEmail(mEmail.getText().toString())) {
                     //TODO Сделать поиск контакта на сервере! (ID, Name, Email)
-                    mPocketDao.insertContact(new ContactsTable(111111, "Test", mEmail.getText().toString(), false));
+
+                    mPocketDao.insertContact(new ContactsTable(mPocketDao.getContacts().size() + 1, "Test" + mPocketDao.getContacts().size(), mEmail.getText().toString(), false));
                     Log.d(TAG, mEmail.getText().toString());
                     Toast.makeText(ChatActivity.this, R.string.contact_added, Toast.LENGTH_SHORT).show();
                     addContactDialog.dismiss();
@@ -241,14 +246,14 @@ public class ChatActivity extends AppCompatActivity
             public void onClick(View v) {
                 if (!mChatRoomName.getText().toString().isEmpty()) {
                     Date currentTime = Calendar.getInstance().getTime();
-                    String time = (currentTime.getHours()+1) + ":"
-                            + (currentTime.getMinutes()+1) + ":"
-                            + (currentTime.getSeconds()+1) + " "
+                    String time = (currentTime.getHours() + 1) + ":"
+                            + (currentTime.getMinutes() + 1) + ":"
+                            + (currentTime.getSeconds() + 1) + " "
                             + currentTime.getDate() + "."
                             + (currentTime.getMonth() + 1) + "."
                             + (currentTime.getYear() + 1900);
                     Log.d(TAG, "Time: " + time);
-                    mPocketDao.insertChat(new ChatsTable(222222, mChatRoomName.getText().toString(), time));
+                    mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mChatRoomName.getText().toString(), time));
                     Log.d(TAG, mChatRoomName.getText().toString());
                     Toast.makeText(ChatActivity.this, "ChatRoom successfully created at: " + time, Toast.LENGTH_SHORT).show();
                     addChatRoomDialog.dismiss();
