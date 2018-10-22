@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.gb.pocketmessenger.AppDelegate;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.Network.ConnectionToServer;
+import com.gb.pocketmessenger.Network.RestUtils;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.Correct;
@@ -162,48 +163,17 @@ public class RegisterFragment extends Fragment {
         });
 
         registerButton.setOnClickListener(v ->
-//        {
-//            if (loginIndex == 1 && pswdIndex != 0 && emailIndex == 1) {
-//                Toast.makeText(getContext(), "Registration...", Toast.LENGTH_SHORT).show();
-//                sendRegisterData(loginEditText.getText().toString(), emailEditText.getText().toString(),
-//                        passwordEditText.getText().toString());
-//        } else Toast.makeText(getContext(), "Registation Error!", Toast.LENGTH_SHORT).show();
-//
-//
-//        }
         {
-            //ПРИМЕР ДОБАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯ
-            addContact("321"); // здесь вводим email пользователя
+            if (loginIndex == 1 && pswdIndex != 0 && emailIndex == 1) {
+                Toast.makeText(getContext(), "Registration...", Toast.LENGTH_SHORT).show();
+                RestUtils.sendRegisterData(loginEditText.getText().toString(), emailEditText.getText().toString(),
+                        passwordEditText.getText().toString(), mPocketDao);
+        } else Toast.makeText(getContext(), "Registation Error!", Toast.LENGTH_SHORT).show();
 
-        });
+
+        }
+);
         return view;
-    }
-
-    private void sendRegisterData(String login, String email, String password) {
-        User newUser = new User(login, password);
-        newUser.seteMail(email);
-        ConnectionToServer connection = new ConnectionToServer("REGISTER", newUser, mPocketDao );
-        connection.execute(CURRENT_SERVER);
-        try {
-            serverResponse.setText(connection.get());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void addContact(String email) {
-        User newUser = new User(email);
-        ConnectionToServer connection = new ConnectionToServer("ADD_CONTACT", newUser, mPocketDao);
-        connection.execute(CURRENT_SERVER);
-        try {
-            serverResponse.setText(connection.get());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
     }
 
 }

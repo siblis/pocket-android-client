@@ -109,7 +109,7 @@ public class LoginFragment extends Fragment {
     //TODO REFACTOR
     private void authentication(String login, String password) {
         User user = new User(login, password);
-        String token = RestUtils.login(user, mPocketDao);
+        token = RestUtils.login(user, mPocketDao);
 
         if (token != null) {
 
@@ -126,10 +126,9 @@ public class LoginFragment extends Fragment {
 
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
 
-//            Intent intent = new Intent(getActivity(), ChatActivity.class);
-//            startActivity(intent);
-
-            loadChatMessagesFragment();
+            Intent intent = new Intent(getActivity(), ChatActivity.class);
+            startActivity(intent);
+            //loadChatMessagesFragment();
         } else {
             Toast.makeText(getContext(), "Incorrect Login or Password!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Incorrect Login or Password!");
@@ -149,6 +148,7 @@ public class LoginFragment extends Fragment {
         String cUser = crypt(mUserId);
         String cPass = crypt(mUserPass);
         mPocketDao.insertUser(new UserTable(0, cUser, cPass, mUserEmail, token, mServerUserId));
+        mPocketDao.insertContact(new ContactsTable(mServerUserId, mUserId, mUserEmail, true));
         Log.d(TAG, "User saved!");
     }
 
@@ -198,6 +198,11 @@ public class LoginFragment extends Fragment {
         transaction.addToBackStack(null);
         transaction.setTransition(TRANSIT_FRAGMENT_FADE);
         transaction.commit();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
 }

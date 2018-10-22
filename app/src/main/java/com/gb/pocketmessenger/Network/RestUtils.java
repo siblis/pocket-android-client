@@ -40,4 +40,39 @@ public class RestUtils {
         }
         return JsonParser.parseUser(userID);
     }
+
+    public static String sendRegisterData(String login, String email, String password, PocketDao pocketDao) {
+        User newUser = new User(login, password);
+        String result = "";
+        newUser.seteMail(email);
+        ConnectionToServer connection = new ConnectionToServer("REGISTER", newUser, pocketDao);
+        connection.execute(CURRENT_SERVER);
+        try {
+            result = connection.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static String addContact(String email, PocketDao pocketDao) {
+        User newUser = new User(email);
+        String result = "";
+        ConnectionToServer connection = new ConnectionToServer("ADD_CONTACT", newUser, pocketDao);
+        connection.execute(CURRENT_SERVER);
+        try {
+            result = connection.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static String getContactList() {
+        return null;
+    }
 }

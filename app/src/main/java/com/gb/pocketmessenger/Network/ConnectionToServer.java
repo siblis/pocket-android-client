@@ -149,7 +149,8 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     connection.setRequestMethod("POST");
                     connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                     connection.setRequestProperty("Accept", "application/json");
-                    connection.setRequestProperty("Token", pocketDao.getUser().getToken());
+                    String token = pocketDao.getUser().getToken();
+                    connection.setRequestProperty("Token", token);
 
                     JSONObject contact = new JSONObject();
                     try {
