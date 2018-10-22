@@ -30,6 +30,17 @@
     <string name="register">Регистрация</string>
     <string name="cancel">Отмена</string>
     <string name="enter_email">Введите e-mail</string>
+    <string name="chat_fragment">chat_fragment</string>
+    <string name="contacts_fragment">contacts_fragment</string>
+    <string name="add_contact">Add Contact</string>
+    <string name="enter_email_here">Enter email here</string>
+    <string name="add">ADD</string>
+    <string name="add_chatroom">Create ChatRoom</string>
+    <string name="enter_chatroom_name_here">Enter ChatRoom name here</string>
+    <string name="empty_email">Incorrect email!</string>
+    <string name="contact_added">Contact successfully added!</string>
+    <string name="create">Create</string>
+    <string name="chatroom_name_empty">ChatRoom name is Empty!</string>
 
 
 </resources>

@@ -22,6 +22,7 @@ import android.provider.Settings.Secure;
 
 import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.AppDelegate;
+import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UserTable;
 import com.gb.pocketmessenger.Network.ConnectionToServer;
@@ -77,7 +78,7 @@ public class LoginFragment extends Fragment {
         connector = WssConnector.getInstance();
 
         //TODO Раскомментируйте следующую строку для LOGOUT. После создания макета будет привязано к кнопке logout.
-        deleteUser();
+        //deleteUser();
 
         if (checkSavedUser()) {
             loadUser();
@@ -144,9 +145,9 @@ public class LoginFragment extends Fragment {
             Log.d(TAG, "token: " + token);
             Log.d(TAG, "You logged successfully!");
 
-//            Intent intent = new Intent(getActivity(), ChatActivity.class);
-//            startActivity(intent);
-            loadChatMessagesFragment();
+            Intent intent = new Intent(getActivity(), ChatActivity.class);
+            startActivity(intent);
+            //loadChatMessagesFragment();
         } else {
             Toast.makeText(getContext(), "Incorrect Login or Password!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Incorrect Login or Password!");
@@ -182,6 +183,7 @@ public class LoginFragment extends Fragment {
         String cUser = crypt(mUserId);
         String cPass = crypt(mUserPass);
         mPocketDao.insertUser(new UserTable(0, cUser, cPass, mUserEmail, token, mServerUserId));
+        mPocketDao.insertContact(new ContactsTable(mServerUserId, mUserId, mUserEmail, true));
         Log.d(TAG, "User saved!");
     }
 
@@ -216,7 +218,11 @@ public class LoginFragment extends Fragment {
     private void loadChatMessagesFragment() {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.login_container, new ChatMessages());
+        ChatMessages fragment = new ChatMessages();
+        Bundle bundle = new Bundle();
+        bundle.putInt("chat_id", 1);
+        fragment.setArguments(bundle);
+        transaction.replace(R.id.login_container, fragment);
         transaction.commit();
     }
 
