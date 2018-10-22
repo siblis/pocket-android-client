@@ -19,7 +19,13 @@ public interface PocketDao {
     void insertChats(List<ChatsTable> chats);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertChat(ChatsTable chat);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertContacts(List<ContactsTable> contacts);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertContact(ContactsTable contact);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertMessages(List<MessagesTable> messages);
