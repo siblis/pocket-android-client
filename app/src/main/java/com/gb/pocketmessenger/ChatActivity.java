@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -30,11 +31,16 @@ import com.gb.pocketmessenger.fragments.ChatMessages;
 import com.gb.pocketmessenger.fragments.MyProfileFragment;
 import com.gb.pocketmessenger.fragments.SupportFragment;
 import com.gb.pocketmessenger.fragments.TabsFragment;
+import com.gb.pocketmessenger.models.PocketContact;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.Correct;
+import com.gb.pocketmessenger.utils.JsonParser;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
 
 
 public class ChatActivity extends AppCompatActivity
@@ -70,8 +76,13 @@ public class ChatActivity extends AppCompatActivity
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.container, TabsFragment.newInstance(Tabs.Contacts)).commit();
+//            FragmentManager fragmentManager = getSupportFragmentManager();
+//            fragmentManager.beginTransaction().addToBackStack(null)
+//                    .replace(R.id.container, TabsFragment.newInstance(Tabs.Contacts))
+//                    .commit();
+            String  usersJson = RestUtils.getContactList(mPocketDao);
+            List<PocketContact> allContacts = JsonParser.parseUsersMap(usersJson);
+
         });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -82,8 +93,7 @@ public class ChatActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-
+        
         //TODO откладываем до лучших времен
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -215,14 +225,17 @@ public class ChatActivity extends AppCompatActivity
             String email = mEmail.getText().toString();
             if (!email.isEmpty() && Correct.isValidEmail(email)) {
                 //TODO Сделать поиск контакта на сервере! (ID, Name, Email)
-                String newUser = RestUtils.addContact(email, mPocketDao);
+                String newUserJSON = RestUtils.addContact(email, mPocketDao);
+                if (!TextUtils.isEmpty(newUserJSON)) {
+                    User newContact = JsonParser.parseUser(newUserJSON);
+                    mPocketDao.insertContact(new ContactsTable(Integer.parseInt(newContact.getId()), newContact.getName(), mEmail.getText().toString(), false));
+                    if (listener != null) listener.onContactAdded();
+                } else
+                    Toast.makeText(ChatActivity.this, R.string.contact_added, Toast.LENGTH_SHORT).show();
 
-// здесь будет получение списка пользователей... нужно обсуждать с бэком, сейчас у них криво
-
-             //   mPocketDao.insertContact(new ContactsTable(mPocketDao.getContacts().size() + 1, newUser.getName() + mPocketDao.getContacts().size(), mEmail.getText().toString(), false));
                 Log.d(TAG, mEmail.getText().toString());
-                if (listener!= null) listener.onContactAdded();
-                Toast.makeText(ChatActivity.this, R.string.contact_added, Toast.LENGTH_SHORT).show();
+
+
                 addContactDialog.dismiss();
             } else {
                 Log.d(TAG, "Email is Empty!");

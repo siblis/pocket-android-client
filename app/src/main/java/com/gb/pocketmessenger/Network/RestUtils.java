@@ -72,7 +72,18 @@ public class RestUtils {
         return result;
     }
 
-    public static String getContactList() {
-        return null;
+    public static String getContactList(PocketDao pocketDao) {
+        User newUser = new User();
+        String result = "";
+        ConnectionToServer connection = new ConnectionToServer("GET_CONTACTS", newUser, pocketDao);
+        connection.execute(CURRENT_SERVER);
+        try {
+            result = connection.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }
