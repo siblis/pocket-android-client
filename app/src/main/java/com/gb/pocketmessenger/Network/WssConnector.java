@@ -26,9 +26,14 @@ public class WssConnector {
     private static ServiceConnection serviceConnection;
     private Context context;
     private static OnIncomingMessage listener;
+    private static OnWssConnected wssListener;
 
     public interface OnIncomingMessage {
         void onIncomingMessage(String receiverId, String incomingMessage);
+    }
+
+    public interface OnWssConnected {
+        void onWssConnected();
     }
 
     private WssConnector(Context context) {
@@ -44,6 +49,10 @@ public class WssConnector {
 
     public void setOnIncomingMessageListener(OnIncomingMessage listener) {
         WssConnector.listener = listener;
+    }
+
+    public void setOnWssConnectedListener(OnWssConnected wssListener) {
+        WssConnector.wssListener = wssListener;
     }
 
     public static WssConnector getInstance() {
@@ -75,6 +84,8 @@ public class WssConnector {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 isServiceConnected = true;
                 wssService = ((PocketMessengerWssService.MyBinder) service).getService();
+                if (wssListener != null)
+                    wssListener.onWssConnected();
             }
 
             @Override

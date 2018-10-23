@@ -15,11 +15,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gb.pocketmessenger.AppDelegate;
+import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.Network.ConnectionToServer;
+import com.gb.pocketmessenger.Network.RestUtils;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.Correct;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import static com.gb.pocketmessenger.Constants.CURRENT_SERVER;
@@ -38,6 +42,7 @@ public class RegisterFragment extends Fragment {
     private int loginIndex = 0;
     private int emailIndex = 0;
     private int pswdIndex = 0;
+    private PocketDao mPocketDao;
 
     public static RegisterFragment newInstance() {
         return new RegisterFragment();
@@ -47,6 +52,9 @@ public class RegisterFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_register, container, false);
+
+        mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
+
         loginText = view.findViewById(R.id.login_text);
         passwordText = view.findViewById(R.id.password_text);
         emailText = view.findViewById(R.id.email_text);
@@ -158,27 +166,14 @@ public class RegisterFragment extends Fragment {
         {
             if (loginIndex == 1 && pswdIndex != 0 && emailIndex == 1) {
                 Toast.makeText(getContext(), "Registration...", Toast.LENGTH_SHORT).show();
-                sendRegisterData(loginEditText.getText().toString(), emailEditText.getText().toString(),
-                        passwordEditText.getText().toString());
-            } else Toast.makeText(getContext(), "Registation Error!", Toast.LENGTH_SHORT).show();
+                RestUtils.sendRegisterData(loginEditText.getText().toString(), emailEditText.getText().toString(),
+                        passwordEditText.getText().toString(), mPocketDao);
+        } else Toast.makeText(getContext(), "Registation Error!", Toast.LENGTH_SHORT).show();
 
 
-        });
-        return view;
-    }
-
-    private void sendRegisterData(String login, String email, String password) {
-        User newUser = new User(login, password);
-        newUser.seteMail(email);
-        ConnectionToServer connection = new ConnectionToServer("REGISTER", newUser);
-        connection.execute(CURRENT_SERVER);
-        try {
-            serverResponse.setText(connection.get());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         }
+);
+        return view;
     }
 
 }

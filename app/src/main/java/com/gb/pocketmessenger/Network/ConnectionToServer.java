@@ -2,6 +2,7 @@ package com.gb.pocketmessenger.Network;
 
 import android.os.AsyncTask;
 
+import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.models.User;
 
 import org.json.JSONObject;
@@ -19,10 +20,12 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
 
     private String action;
     private User user;
+    private PocketDao pocketDao;
 
-    public ConnectionToServer(String action, User user) {
+    public ConnectionToServer(String action, User user, PocketDao pocketDao) {
         this.action = action;
         this.user = user;
+        this.pocketDao  = pocketDao;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... urls) {
         try {
-            return connectToServer(urls[0], action, user);
+            return connectToServer(urls[0], action, user, pocketDao);
         } catch (IOException e) {
             e.printStackTrace();
             return "error";
@@ -45,7 +48,7 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
         super.onPostExecute(result);
     }
 
-    private String connectToServer(String myUrl, String action, User user) throws IOException {
+    private String connectToServer(String myUrl, String action, User user, PocketDao pocketDao) throws IOException {
         String data = "";
         JSONObject userJson = new JSONObject();
         try {
@@ -114,6 +117,7 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     e.printStackTrace();
                 }
                 return data;
+
             case "GET_ID":
                 try {
                     URL url = new URL(myUrl + "/v1/users/");
@@ -128,10 +132,64 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     if (responseCode == 200) {
                         data = getConnectionData(connection);
                     } else if (responseCode == 401) {
-                        data = "НЕ УДАЛОСЬ ПОЛУЧИТЬ ID ПОЛЬЗОВАТЕЛЯ";
+                        data = "Unauthorized!";
                     } else if (responseCode == 404) {
-                        data = "НЕ УДАЛОСЬ ПОЛУЧИТЬ ID ПОЛЬЗОВАТЕЛЯ";
+                        data = "Token not found!";
                     }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return data;
+            case "ADD_CONTACT":
+                try {
+                    URL url = new URL(myUrl + "/v1/users/contacts/");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    connection.setRequestProperty("Accept", "application/json");
+                    String token = pocketDao.getUser().getToken();
+                    connection.setRequestProperty("Token", token);
+
+                    JSONObject contact = new JSONObject();
+                    try {
+                        if (user.geteMail() != null) contact.put("contact", user.geteMail());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
+                    wr.write(contact.toString());
+                    wr.flush();
+                    connection.connect();
+
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == 201) {
+                        data = getConnectionData(connection);
+                    } else if (responseCode == 404) {
+                        data = "User does not exists";
+                    } else if (responseCode == 409) {
+                        data = "Contact already in list";
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return data;
+            case "GET_CONTACT":
+                try {
+                    URL url = new URL(myUrl + "/v1/users/contacts/");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    connection.setRequestProperty("Accept", "application/json");
+                    connection.setRequestProperty("Token", pocketDao.getUser().getToken());
+                    connection.connect();
+
+                    data = getConnectionData(connection);
+                    
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
