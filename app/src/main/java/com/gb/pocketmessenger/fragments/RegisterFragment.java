@@ -165,9 +165,10 @@ public class RegisterFragment extends Fragment {
         registerButton.setOnClickListener(v ->
         {
             if (loginIndex == 1 && pswdIndex != 0 && emailIndex == 1) {
-                Toast.makeText(getContext(), "Registration...", Toast.LENGTH_SHORT).show();
-                RestUtils.sendRegisterData(loginEditText.getText().toString(), emailEditText.getText().toString(),
+               String result =  RestUtils.sendRegisterData(loginEditText.getText().toString(), emailEditText.getText().toString(),
                         passwordEditText.getText().toString(), mPocketDao);
+                Toast.makeText(getContext(), "Registration..."+ result, Toast.LENGTH_SHORT).show();
+                //TODO здесь нужно проверить ответ сервера и добавить пользователя в базу данных
         } else Toast.makeText(getContext(), "Registation Error!", Toast.LENGTH_SHORT).show();
 
 

@@ -77,7 +77,6 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
 
                     if (responseCode == 201) {
                         data = getConnectionData(connection);
-
                     } else if (responseCode == 409) {
                         data = "Такая учетная запись существует!";
                     } else if (responseCode == 400) {
@@ -178,14 +177,13 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     e.printStackTrace();
                 }
                 return data;
-            case "GET_CONTACT":
+            case "GET_CONTACTS":
                 try {
                     URL url = new URL(myUrl + "/v1/users/contacts/");
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
-                    connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                    connection.setRequestProperty("Accept", "application/json");
-                    connection.setRequestProperty("Token", pocketDao.getUser().getToken());
+                    String token = pocketDao.getUser().getToken();
+                    connection.setRequestProperty("Token", token);
                     connection.connect();
 
                     data = getConnectionData(connection);

@@ -72,6 +72,7 @@ public class LoginFragment extends Fragment {
         mPrefs = getContext().getSharedPreferences("com.gb.pocketmessenger.PREFERENCE", getContext().MODE_PRIVATE);
         mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
         connector = WssConnector.getInstance();
+        view.findViewById(R.id.button_register).setOnClickListener(v -> loadRegisterFragment());
 
         //TODO Раскомментируйте следующую строку для LOGOUT. После создания макета будет привязано к кнопке logout.
         //deleteUser();
@@ -122,7 +123,7 @@ public class LoginFragment extends Fragment {
             mUserEmail = inServerUser.geteMail();
             mServerUserId = Integer.parseInt(inServerUser.getId());
 
-            if (!checkSavedUser()) saveUser();
+            saveUser();
 
             Toast.makeText(getContext(), "You logged successfully!", Toast.LENGTH_SHORT).show();
 
