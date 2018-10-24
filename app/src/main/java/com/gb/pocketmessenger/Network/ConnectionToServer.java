@@ -1,6 +1,7 @@
 package com.gb.pocketmessenger.Network;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.models.User;
@@ -21,6 +22,7 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
     private String action;
     private User user;
     private PocketDao pocketDao;
+    private static final String TAG = "tar";
 
     public ConnectionToServer(String action, User user, PocketDao pocketDao) {
         this.action = action;
@@ -166,6 +168,7 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     int responseCode = connection.getResponseCode();
                     if (responseCode == 201) {
                         data = getConnectionData(connection);
+                        Log.d(TAG, "connectToServer ADD_CONTACT data: " + data);
                     } else if (responseCode == 404) {
                         data = "User does not exists";
                     } else if (responseCode == 409) {

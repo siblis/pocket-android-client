@@ -1,6 +1,7 @@
 package com.gb.pocketmessenger.utils;
 
 
+import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.models.IncomingMessage;
 import com.gb.pocketmessenger.models.Message;
 import com.gb.pocketmessenger.models.PocketContact;
@@ -52,6 +53,18 @@ public class JsonParser {
         Map<String, MyPair> usersMap = new Gson().fromJson(usersJson, itemsMapType);
         for (String key : usersMap.keySet()) {
             contactList.add(new PocketContact(usersMap.get(key).id, key, usersMap.get(key).name));
+        }
+        if (contactList.isEmpty()) return null;
+        return contactList;
+    }
+
+    public static List<ContactsTable> parseContacts(String usersJson) {
+        List<ContactsTable> contactList = new ArrayList<>();
+        Type itemsMapType = new TypeToken<Map<String, MyPair>>() {
+        }.getType();
+        Map<String, MyPair> usersMap = new Gson().fromJson(usersJson, itemsMapType);
+        for (String key : usersMap.keySet()) {
+            contactList.add(new ContactsTable(Integer.valueOf(usersMap.get(key).id), usersMap.get(key).name, key, false));
         }
         if (contactList.isEmpty()) return null;
         return contactList;

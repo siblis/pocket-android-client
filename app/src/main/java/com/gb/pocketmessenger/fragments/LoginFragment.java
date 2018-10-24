@@ -32,6 +32,8 @@ import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.JsonParser;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -74,17 +76,31 @@ public class LoginFragment extends Fragment {
         connector = WssConnector.getInstance();
         view.findViewById(R.id.button_register).setOnClickListener(v -> loadRegisterFragment());
 
+
         //TODO Раскомментируйте следующую строку для LOGOUT. После создания макета будет привязано к кнопке logout.
         //deleteUser();
 
         if (checkSavedUser()) {
             loadUser();
             Log.d(TAG, "USER: " + mPocketDao.getUser().getUserName()
-                    + " PASS: " + mPocketDao.getUser().getPassword()
-                    + " EMAIL: " + mPocketDao.getUser().getEmail()
-                    + " TOKEN: " + mPocketDao.getUser().getToken()
-                    + " SERVER_USER_ID: " + mPocketDao.getUser().getServerUserId());
+                    + "PASS: " + mPocketDao.getUser().getPassword()
+                    + "EMAIL: " + mPocketDao.getUser().getEmail()
+                    + "\nTOKEN: " + mPocketDao.getUser().getToken()
+                    + "\nSERVER_USER_ID: " + mPocketDao.getUser().getServerUserId());
         } else Log.d(TAG, "USER: Empty");
+
+        for (int i = 0; i < mPocketDao.getContacts().size(); i++) {
+            Log.d(TAG, "DataBase Contact " + i + ": id=" + mPocketDao.getContacts().get(i).getId()
+                    + " " + mPocketDao.getContacts().get(i).getUserName()
+                    + " " + mPocketDao.getContacts().get(i).getEmail()
+            );
+        }
+
+        for (int i = 0; i < mPocketDao.getChats().size(); i++) {
+            Log.d(TAG, "DataBase Chat Room " + i + ": id=" + mPocketDao.getChats().get(i).getId()
+                    + " " + mPocketDao.getChats().get(i).getChatName()
+            );
+        }
 
         if (!checkSavedUser()) {
 
@@ -150,6 +166,7 @@ public class LoginFragment extends Fragment {
         String cPass = crypt(mUserPass);
         mPocketDao.insertUser(new UserTable(0, cUser, cPass, mUserEmail, token, mServerUserId));
         mPocketDao.insertContact(new ContactsTable(mServerUserId, mUserId, mUserEmail, true));
+        getContactsList();
         Log.d(TAG, "User saved!");
     }
 
@@ -204,6 +221,18 @@ public class LoginFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    private void getContactsList() {
+        String newContactsList = RestUtils.getContactList(mPocketDao);
+        Log.d(TAG, "getContactsList: " + newContactsList);
+        List<ContactsTable> mContactsList = new ArrayList<>();
+        mContactsList = JsonParser.parseContacts(newContactsList);
+        for (int i = 0; i < mContactsList.size(); i++) {
+            mPocketDao.insertContact(mContactsList.get(i));
+            Log.d(TAG, "Contact " + i + " added to DataBase");
+        }
+
     }
 
 }

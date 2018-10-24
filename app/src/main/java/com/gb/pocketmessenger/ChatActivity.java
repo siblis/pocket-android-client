@@ -60,6 +60,7 @@ public class ChatActivity extends AppCompatActivity
     private static final String TAG = "tar";
     private OnContactAdded listener;
 
+
     public void setListener(OnContactAdded listener) {
         this.listener = listener;
     }
@@ -70,7 +71,6 @@ public class ChatActivity extends AppCompatActivity
         setContentView(R.layout.activity_chat);
 
         mPocketDao = ((AppDelegate) getApplicationContext()).getPocketDatabase().getPocketDao();
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -80,7 +80,7 @@ public class ChatActivity extends AppCompatActivity
 //            fragmentManager.beginTransaction().addToBackStack(null)
 //                    .replace(R.id.container, TabsFragment.newInstance(Tabs.Contacts))
 //                    .commit();
-            String  usersJson = RestUtils.getContactList(mPocketDao);
+            String usersJson = RestUtils.getContactList(mPocketDao);
             List<PocketContact> allContacts = JsonParser.parseUsersMap(usersJson);
 
         });
@@ -93,7 +93,7 @@ public class ChatActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        
+
         //TODO откладываем до лучших времен
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -226,19 +226,22 @@ public class ChatActivity extends AppCompatActivity
             if (!email.isEmpty() && Correct.isValidEmail(email)) {
                 //TODO Сделать поиск контакта на сервере! (ID, Name, Email)
                 String newUserJSON = RestUtils.addContact(email, mPocketDao);
-                if (!TextUtils.isEmpty(newUserJSON)) {
+
+                if (!TextUtils.isEmpty(newUserJSON) && !newUserJSON.equals("User does not exists") && !newUserJSON.equals("Contact already in list")) {
+                    Log.d(TAG, "addContact: " + newUserJSON);
                     User newContact = JsonParser.parseUser(newUserJSON);
                     mPocketDao.insertContact(new ContactsTable(Integer.parseInt(newContact.getId()), newContact.getName(), mEmail.getText().toString(), false));
+                    Toast.makeText(ChatActivity.this, R.string.contact_added + " : " + newUserJSON, Toast.LENGTH_SHORT).show();
+
                     if (listener != null) listener.onContactAdded();
+
+                    addContactDialog.dismiss();
                 } else
-                    Toast.makeText(ChatActivity.this, R.string.contact_added, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChatActivity.this, newUserJSON, Toast.LENGTH_SHORT).show();
 
-                Log.d(TAG, mEmail.getText().toString());
-
-
-                addContactDialog.dismiss();
             } else {
                 Log.d(TAG, "Email is Empty!");
+
                 Toast.makeText(ChatActivity.this, R.string.empty_email, Toast.LENGTH_SHORT).show();
             }
         });
@@ -276,4 +279,5 @@ public class ChatActivity extends AppCompatActivity
 
         addChatRoomDialog.show();
     }
+
 }
