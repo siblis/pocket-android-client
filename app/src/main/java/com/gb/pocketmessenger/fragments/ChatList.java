@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,14 +17,17 @@ import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.DataBase.ChatsTable;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
+import com.gb.pocketmessenger.DataBase.UsersChatsTable;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.Dialog;
 import com.gb.pocketmessenger.models.Message;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.ImgLoader;
 import com.stfalcon.chatkit.commons.models.IDialog;
+import com.stfalcon.chatkit.commons.models.IUser;
 import com.stfalcon.chatkit.dialogs.DialogsList;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,8 +38,9 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
     private DialogsList chats;
     DialogsListAdapter chatListAdapter;
     private PocketDao mPocketDao;
+    private static final String TAG = "tar";
 
-    public static ChatList newInstance () {
+    public static ChatList newInstance() {
         return new ChatList();
     }
 
@@ -53,16 +58,23 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
         chats = view.findViewById(R.id.chatList);
 
-        Cursor chatTable = mPocketDao.getChatsCursor();
+        List<ChatsTable> mChatsList = mPocketDao.getChats();
 
-        while (chatTable.moveToNext()) {
-            dialogs.add(new Dialog(chatTable.getString(chatTable.getColumnIndex("id")),
-                    chatTable.getString(chatTable.getColumnIndex("chat_name")),
-                    getChatUsers(chatTable.getInt(chatTable.getColumnIndex("id"))
-                    )));
+        for (int i = 0; i < mChatsList.size(); i++) {
 
+            //TODO Метод PocketDao.getUsersFromChat() работает не верно! Разобраться почему. Пока не использовать в коде. Пример использования в логе ниже. Выдает неверные данные.
+            for (int k = 0; k < mPocketDao.getUsersFromChat(i).size(); k++) {
+                Log.d(TAG, "Users from chat: " + mPocketDao.getUsersFromChat(i).get(k).getId() + " name: " + mPocketDao.getUsersFromChat(i).get(k).getUserName());
+            }
+
+            dialogs.add(new Dialog(String.valueOf(mChatsList.get(i).getId()), mChatsList.get(i).getChatName(), getChatUsers(mChatsList.get(i).getId())));
         }
-        chatTable.close();
+
+        List<UsersChatsTable> mLinks = mPocketDao.getLinks();
+        for (int i = 0; i < mLinks.size(); i++) {
+            Log.d(TAG, "Links: " + mLinks.get(i).getId() + " user: " + mLinks.get(i).getUserId() + " chat: " + mLinks.get(i).getChatId());
+        }
+
 
         chatListAdapter = new DialogsListAdapter<>(new ImgLoader());
 
@@ -85,14 +97,24 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
 
     }
 
-    private List<User> getChatUsers (int id) {
-        List<ContactsTable> contactsTables = mPocketDao.getUsersFromChat(id);
-        List<User> users = null;
+    private List<User> getChatUsers(int id) {
+        //List<ContactsTable> contactsTables = mPocketDao.getUsersFromChat(id);
+        List<UsersChatsTable> mLinksUsers = mPocketDao.getLinks();
+        List<User> users = new ArrayList<>();
 
-        for(ContactsTable e: contactsTables) {
+        for (int i = 0; i < mLinksUsers.size(); i++) {
+            if (mLinksUsers.get(i).getChatId() == id) {
+                Log.d(TAG, "getChatUsers: " + Integer.toString(mLinksUsers.get(i).getUserId()) + " name: " + mPocketDao.getOneContact(mLinksUsers.get(i).getUserId()).getUserName());
+                //TODO Почему не добавляет User???
+                //users.add(new User("test", "123", String.valueOf(40)));
+                users.add(new User(mPocketDao.getOneContact(mLinksUsers.get(i).getUserId()).getUserName(), "", Integer.toString(mLinksUsers.get(i).getUserId())));
+            }
+        }
+/*
+        for (ContactsTable e : contactsTables) {
             users.add(new User(e.getUserName(), "", Integer.toString(e.getId())));
         }
-
+*/
         return users;
     }
 

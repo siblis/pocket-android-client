@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.gb.pocketmessenger.DataBase.ChatsTable;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
+import com.gb.pocketmessenger.DataBase.UsersChatsTable;
 import com.gb.pocketmessenger.Network.RestUtils;
 import com.gb.pocketmessenger.fragments.AboutFragment;
 import com.gb.pocketmessenger.fragments.ChatMessages;
@@ -268,6 +269,18 @@ public class ChatActivity extends AppCompatActivity
                         + (currentTime.getYear() + 1900);
                 Log.d(TAG, "Time: " + time);
                 mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mChatRoomName.getText().toString(), time));
+                for(int i=0;i<mPocketDao.getChats().size();i++) {
+                    Log.d(TAG, "addChatRoom: " + mPocketDao.getChats().get(i).getId()+ " name: " + mPocketDao.getChats().get(i).getChatName());
+                }
+                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(),mPocketDao.getUser().getServerUserId(),(mPocketDao.getChats().size()-1),time));
+
+                Log.d(TAG, "addLink: " + mPocketDao.getLinks().size() + " | " + mPocketDao.getUser().getId() +  " | chats.size: " + (mPocketDao.getChats().size()-1) +  " | " + time
+                );
+
+                for(int i=0;i<mPocketDao.getLinks().size();i++) {
+                    Log.d(TAG, "Links: " + mPocketDao.getLinks().get(i).getId()+ " user: " + mPocketDao.getLinks().get(i).getUserId() + " chat id:" + mPocketDao.getLinks().get(i).getChatId());
+                }
+
                 Log.d(TAG, mChatRoomName.getText().toString());
                 Toast.makeText(ChatActivity.this, "ChatRoom successfully created at: " + time, Toast.LENGTH_SHORT).show();
                 addChatRoomDialog.dismiss();
