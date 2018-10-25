@@ -5,6 +5,7 @@ import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Dialog implements IDialog {
 
@@ -52,6 +53,18 @@ public class Dialog implements IDialog {
     @Override
     public int getUnreadCount() {
         return 0;
+    }
+
+    public void setId(String id) {
+        Id = id;
+    }
+
+    public void setDialogName(String dialogName) {
+        DialogName = dialogName;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 }
 

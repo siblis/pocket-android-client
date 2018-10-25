@@ -33,6 +33,9 @@ public interface PocketDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void setLinksUsersChats(List<UsersChatsTable> linksUsersChats);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void setOneLinkUserToChat(UsersChatsTable linkUsersChats);
+
     @Query("SELECT * FROM chatstable")
     List<ChatsTable> getChats();
 
@@ -42,6 +45,9 @@ public interface PocketDao {
     @Query("SELECT * FROM chatstable WHERE id = :chatId")
     Cursor getChatWithIdCursor(int chatId);
 
+    @Query("SELECT * FROM userschatstable")
+    List<UsersChatsTable> getLinks();
+
     @Delete
     void deleteChat(ChatsTable chatsTable);
 
@@ -50,6 +56,9 @@ public interface PocketDao {
 
     @Query("SELECT * FROM messagestable WHERE to_id = :chatOrUserId")
     List<MessagesTable> getMessagesToId(int chatOrUserId);
+
+    @Query("SELECT * FROM contactstable WHERE id = :UserId")
+    ContactsTable getOneContact(int UserId);
 
     @Delete
     void deleteContact(ContactsTable contactsTable);

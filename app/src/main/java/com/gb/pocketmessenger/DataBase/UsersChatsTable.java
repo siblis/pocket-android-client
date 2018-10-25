@@ -10,7 +10,7 @@ import android.arch.persistence.room.PrimaryKey;
         @ForeignKey(entity = ChatsTable.class, parentColumns = "id",childColumns = "chat_id")})
 public class UsersChatsTable {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     @ColumnInfo(name = "id")
     private int mId;
 

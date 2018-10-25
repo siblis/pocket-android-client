@@ -56,7 +56,8 @@ public class ContactList extends Fragment implements SwipeRefreshLayout.OnRefres
     }
 
     public void adapterReload() {
-        mContactsAdapter.reload();
+
+        mContactsAdapter.addData(mPocketDao.getContacts());
     }
 
     @Override

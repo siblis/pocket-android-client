@@ -12,6 +12,8 @@ import static com.gb.pocketmessenger.Constants.CURRENT_SERVER;
 
 public class RestUtils {
 
+    private static final String TAG = "tar";
+
     public static String login(User user, PocketDao pocketDao) {
         String result = "";
         ConnectionToServer connection = new ConnectionToServer("LOGIN", user, pocketDao);
@@ -69,6 +71,7 @@ public class RestUtils {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "addContact to Server result: " + result);
         return result;
     }
 
