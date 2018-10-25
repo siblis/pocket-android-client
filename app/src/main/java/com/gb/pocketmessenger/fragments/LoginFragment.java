@@ -197,18 +197,6 @@ public class LoginFragment extends Fragment {
         return decryptedUser;
     }
 
-    @Deprecated
-    private void loadChatMessagesFragment() {
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        ChatMessages fragment = new ChatMessages();
-        Bundle bundle = new Bundle();
-        bundle.putInt("chat_id", 1);
-        fragment.setArguments(bundle);
-        transaction.replace(R.id.login_container, fragment);
-        transaction.commit();
-    }
-
     private void loadRegisterFragment() {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -226,7 +214,7 @@ public class LoginFragment extends Fragment {
     private void getContactsList() {
         String newContactsList = RestUtils.getContactList(mPocketDao);
         Log.d(TAG, "getContactsList: " + newContactsList);
-        List<ContactsTable> mContactsList = new ArrayList<>();
+        List<ContactsTable> mContactsList;
         mContactsList = JsonParser.parseContacts(newContactsList);
         for (int i = 0; i < mContactsList.size(); i++) {
             mPocketDao.insertContact(mContactsList.get(i));

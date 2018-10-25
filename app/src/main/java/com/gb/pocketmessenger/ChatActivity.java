@@ -37,11 +37,9 @@ import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.Correct;
 import com.gb.pocketmessenger.utils.JsonParser;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 
 
 public class ChatActivity extends AppCompatActivity
@@ -55,15 +53,23 @@ public class ChatActivity extends AppCompatActivity
     public interface OnContactAdded {
         void onContactAdded();
     }
+    public interface OnNewChatAdded {
+        void onNewChatAdded();
+    }
 
     public static final String BACKSTACK_TAG = "BackStack_tag";
     private PocketDao mPocketDao;
     private static final String TAG = "tar";
-    private OnContactAdded listener;
+    private OnContactAdded contactAddListener;
+    private OnNewChatAdded chatAddListener;
+    private FragmentManager fragmentManager;
+    private FloatingActionButton fab;
 
-
-    public void setListener(OnContactAdded listener) {
-        this.listener = listener;
+    public void setOnContactAddListener(OnContactAdded listener) {
+        this.contactAddListener = listener;
+    }
+    public void setOnNewChatAddedListener(OnNewChatAdded listener) {
+        this.chatAddListener = listener;
     }
 
     @Override
@@ -75,15 +81,10 @@ public class ChatActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
-//            FragmentManager fragmentManager = getSupportFragmentManager();
-//            fragmentManager.beginTransaction().addToBackStack(null)
-//                    .replace(R.id.container, TabsFragment.newInstance(Tabs.Contacts))
-//                    .commit();
             String usersJson = RestUtils.getContactList(mPocketDao);
             List<PocketContact> allContacts = JsonParser.parseUsersMap(usersJson);
-
         });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -96,16 +97,11 @@ public class ChatActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //TODO откладываем до лучших времен
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.container, TabsFragment.newInstance(Tabs.Chat));
         transaction.addToBackStack(null);
         transaction.commit();
-
-        // и сразу вызаваем фрагмент для написания сообщений
-//        fab.setVisibility(View.INVISIBLE);
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        fragmentManager.beginTransaction().replace(R.id.container, ChatMessages.newInstance("0")).addToBackStack(BACKSTACK_TAG).commit();
     }
 
     @Override
@@ -192,8 +188,13 @@ public class ChatActivity extends AppCompatActivity
         return true;
     }
 
-    public static void setMessageScreen(String dialogId) {
-        ChatMessages.newInstance(dialogId);
+    public void setMessageScreen(String dialogId) {
+        fab.setVisibility(View.GONE);
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        ChatMessages fragment = ChatMessages.newInstance(dialogId);
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void logout() {
@@ -203,16 +204,6 @@ public class ChatActivity extends AppCompatActivity
 
     }
 
-    private void loadChatMessagesFragment() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        ChatMessages fragment = new ChatMessages();
-        Bundle bundle = new Bundle();
-        bundle.putInt("chat_id", 1);
-        fragment.setArguments(bundle);
-        transaction.replace(R.id.login_container, fragment);
-        transaction.commit();
-    }
 
     private void addContact() {
         AlertDialog.Builder mContactBuilder = new AlertDialog.Builder(ChatActivity.this);
@@ -234,7 +225,7 @@ public class ChatActivity extends AppCompatActivity
                     mPocketDao.insertContact(new ContactsTable(Integer.parseInt(newContact.getId()), newContact.getName(), mEmail.getText().toString(), false));
                     Toast.makeText(ChatActivity.this, R.string.contact_added + " : " + newUserJSON, Toast.LENGTH_SHORT).show();
 
-                    if (listener != null) listener.onContactAdded();
+                    if (contactAddListener != null) contactAddListener.onContactAdded();
 
                     addContactDialog.dismiss();
                 } else
@@ -269,20 +260,22 @@ public class ChatActivity extends AppCompatActivity
                         + (currentTime.getYear() + 1900);
                 Log.d(TAG, "Time: " + time);
                 mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mChatRoomName.getText().toString(), time));
-                for(int i=0;i<mPocketDao.getChats().size();i++) {
-                    Log.d(TAG, "addChatRoom: " + mPocketDao.getChats().get(i).getId()+ " name: " + mPocketDao.getChats().get(i).getChatName());
+                for (int i = 0; i < mPocketDao.getChats().size(); i++) {
+                    Log.d(TAG, "addChatRoom: " + mPocketDao.getChats().get(i).getId() + " name: " + mPocketDao.getChats().get(i).getChatName());
                 }
-                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(),mPocketDao.getUser().getServerUserId(),(mPocketDao.getChats().size()-1),time));
+                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), time));
 
-                Log.d(TAG, "addLink: " + mPocketDao.getLinks().size() + " | " + mPocketDao.getUser().getId() +  " | chats.size: " + (mPocketDao.getChats().size()-1) +  " | " + time
+                Log.d(TAG, "addLink: " + mPocketDao.getLinks().size() + " | " + mPocketDao.getUser().getId() + " | chats.size: " + (mPocketDao.getChats().size() - 1) + " | " + time
                 );
 
-                for(int i=0;i<mPocketDao.getLinks().size();i++) {
-                    Log.d(TAG, "Links: " + mPocketDao.getLinks().get(i).getId()+ " user: " + mPocketDao.getLinks().get(i).getUserId() + " chat id:" + mPocketDao.getLinks().get(i).getChatId());
+                for (int i = 0; i < mPocketDao.getLinks().size(); i++) {
+                    Log.d(TAG, "Links: " + mPocketDao.getLinks().get(i).getId() + " user: " + mPocketDao.getLinks().get(i).getUserId() + " chat id:" + mPocketDao.getLinks().get(i).getChatId());
                 }
 
                 Log.d(TAG, mChatRoomName.getText().toString());
+
                 Toast.makeText(ChatActivity.this, "ChatRoom successfully created at: " + time, Toast.LENGTH_SHORT).show();
+                if (contactAddListener != null) chatAddListener.onNewChatAdded();
                 addChatRoomDialog.dismiss();
             } else {
                 Log.d(TAG, "ChatRoom name is Empty!");
