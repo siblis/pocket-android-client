@@ -25,7 +25,6 @@ public class ContactList extends Fragment implements SwipeRefreshLayout.OnRefres
     private final ContactsAdapter mContactsAdapter = new ContactsAdapter();
     private PocketDao mPocketDao;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ChatActivity.OnContactAdded listener;
 
     public static ContactList newInstance() {
         return new ContactList();
@@ -36,7 +35,7 @@ public class ContactList extends Fragment implements SwipeRefreshLayout.OnRefres
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
         View view = inflater.inflate(R.layout.fragment_contact_list, container, false);
-        ((ChatActivity) getActivity()).setListener(this);
+        ((ChatActivity) getActivity()).setOnContactAddListener(this);
         return view;
     }
 
@@ -72,4 +71,5 @@ public class ContactList extends Fragment implements SwipeRefreshLayout.OnRefres
     public void onContactAdded() {
         mContactsAdapter.addData(mPocketDao.getContacts());
     }
+
 }

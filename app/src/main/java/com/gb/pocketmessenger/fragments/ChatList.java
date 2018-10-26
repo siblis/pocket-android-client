@@ -1,11 +1,9 @@
 package com.gb.pocketmessenger.fragments;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +13,6 @@ import android.widget.Toast;
 import com.gb.pocketmessenger.AppDelegate;
 import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.DataBase.ChatsTable;
-import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UsersChatsTable;
 import com.gb.pocketmessenger.R;
@@ -23,8 +20,6 @@ import com.gb.pocketmessenger.models.Dialog;
 import com.gb.pocketmessenger.models.Message;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.ImgLoader;
-import com.stfalcon.chatkit.commons.models.IDialog;
-import com.stfalcon.chatkit.commons.models.IUser;
 import com.stfalcon.chatkit.dialogs.DialogsList;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 
@@ -33,10 +28,10 @@ import java.util.List;
 import java.util.Objects;
 
 public class ChatList extends Fragment implements DialogsListAdapter.OnDialogClickListener<Dialog>,
-        DialogsListAdapter.OnDialogLongClickListener<Dialog> {
-    private List<Dialog> dialogs = new ArrayList<>();
+        DialogsListAdapter.OnDialogLongClickListener<Dialog>, ChatActivity.OnNewChatAdded {
+    private List<Dialog> dialogs;
     private DialogsList chats;
-    DialogsListAdapter chatListAdapter;
+    private DialogsListAdapter chatListAdapter;
     private PocketDao mPocketDao;
     private static final String TAG = "tar";
 
@@ -46,6 +41,7 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        ((ChatActivity) getActivity()).setOnNewChatAddedListener(this);
         super.onCreate(savedInstanceState);
         mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
     }
@@ -53,48 +49,42 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ChatActivity.setMessageScreen("0");
-
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
         chats = view.findViewById(R.id.chatList);
-
-        List<ChatsTable> mChatsList = mPocketDao.getChats();
-
-        for (int i = 0; i < mChatsList.size(); i++) {
-
-            //TODO Метод PocketDao.getUsersFromChat() работает не верно! Разобраться почему. Пока не использовать в коде. Пример использования в логе ниже. Выдает неверные данные.
-            for (int k = 0; k < mPocketDao.getUsersFromChat(i).size(); k++) {
-                Log.d(TAG, "Users from chat: " + mPocketDao.getUsersFromChat(i).get(k).getId() + " name: " + mPocketDao.getUsersFromChat(i).get(k).getUserName());
-            }
-
-            dialogs.add(new Dialog(String.valueOf(mChatsList.get(i).getId()), mChatsList.get(i).getChatName(), getChatUsers(mChatsList.get(i).getId())));
-        }
 
         List<UsersChatsTable> mLinks = mPocketDao.getLinks();
         for (int i = 0; i < mLinks.size(); i++) {
             Log.d(TAG, "Links: " + mLinks.get(i).getId() + " user: " + mLinks.get(i).getUserId() + " chat: " + mLinks.get(i).getChatId());
         }
 
+        getDialogList();
+        setChatAdapter();
+        return view;
+    }
+
+    private void setChatAdapter() {
 
         chatListAdapter = new DialogsListAdapter<>(new ImgLoader());
-
         chatListAdapter.setItems(dialogs);
-
-        chatListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
-            @Override
-            public void onDialogClick(IDialog dialog) {
-                ChatActivity.setMessageScreen(dialog.getId());
-            }
-        });
-
+        chatListAdapter.setOnDialogClickListener(dialog -> ((ChatActivity) getActivity()).setMessageScreen(dialog.getId()));
         chats.setAdapter(chatListAdapter);
+    }
 
-        return view;
+    private List<Dialog> getDialogList(){
+        List<ChatsTable> mChatsList = mPocketDao.getChats();
+        dialogs = new ArrayList<>();
+        for (int i = 0; i < mChatsList.size(); i++) {
+            //TODO Метод PocketDao.getUsersFromChat() работает не верно! Разобраться почему. Пока не использовать в коде. Пример использования в логе ниже. Выдает неверные данные.
+            for (int k = 0; k < mPocketDao.getUsersFromChat(i).size(); k++) {
+                Log.d(TAG, "Users from chat: " + mPocketDao.getUsersFromChat(i).get(k).getId() + " name: " + mPocketDao.getUsersFromChat(i).get(k).getUserName());
+            }
+            dialogs.add(new Dialog(String.valueOf(mChatsList.get(i).getId()), mChatsList.get(i).getChatName(), getChatUsers(mChatsList.get(i).getId())));
+        }
+        return dialogs;
     }
 
     private void onNewMessage(String dialogId, Message message) {
         boolean isUpdated = chatListAdapter.updateDialogWithMessage(dialogId, message);
-
     }
 
     private List<User> getChatUsers(int id) {
@@ -130,5 +120,11 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
     @Override
     public void onDialogLongClick(Dialog dialog) {
 
+    }
+
+    @Override
+    public void onNewChatAdded() {
+        getDialogList();
+        setChatAdapter();
     }
 }

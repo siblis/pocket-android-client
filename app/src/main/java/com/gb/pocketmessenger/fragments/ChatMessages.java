@@ -27,18 +27,16 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     private MessagesListAdapter<Message> messageAdapter;
     private Message message;
     private final String senderId = "0";    //TODO: get senderID
-    private String login;
-    private String password;
+    private String dialogId;
     private WssConnector connector;
 
 
     public static ChatMessages newInstance(String dialogId) {
         ChatMessages myFragment = new ChatMessages();
 
-//        Bundle args = new Bundle();
-//        args.putString("login", login);
-//        args.putString("password", password);
-//        myFragment.setArguments(args);
+        Bundle args = new Bundle();
+        args.putString("DIALOG_ID", dialogId);
+        myFragment.setArguments(args);
 
         return myFragment;
     }
@@ -48,18 +46,8 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         super.onCreate(savedInstanceState);
         connector = WssConnector.getInstance();
         connector.setOnIncomingMessageListener(this);
-//        login = getArguments().getString("login", "");
-//        password = getArguments().getString("password", "");
-//        User newUser = new User(login, password);
-//        ConnectionToServer connection = new ConnectionToServer("LOGIN", newUser);
-//        connection.execute(POCKET_MESSENGER_URL);
-//        try {
-//            Toast.makeText(getContext(), connection.get(), Toast.LENGTH_SHORT).show();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
+        dialogId = getArguments().getString("DIALOG_ID", "");
+
     }
 
     @Nullable
@@ -111,7 +99,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         message.user.id = senderId;
         message.receiver = "321";
         if (connector != null)
-            connector.sendMessage(JsonParser.getWssMessage(message));
+            WssConnector.sendMessage(JsonParser.getWssMessage(message));
         else Toast.makeText(getContext(), "Ошибка отправки сообщения", Toast.LENGTH_SHORT).show();
         //send
         //save to DB
