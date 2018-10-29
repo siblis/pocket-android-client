@@ -1,6 +1,7 @@
 package com.gb.pocketmessenger;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -22,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.gb.pocketmessenger.Adapters.ContactsAdapter;
 import com.gb.pocketmessenger.DataBase.ChatsTable;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
@@ -43,7 +45,9 @@ import java.util.List;
 
 
 public class ChatActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ContactsAdapter.OnItemClickListener {
+
+    private String mTime;
 
     public enum Tabs {
         Chat,
@@ -53,6 +57,7 @@ public class ChatActivity extends AppCompatActivity
     public interface OnContactAdded {
         void onContactAdded();
     }
+
     public interface OnNewChatAdded {
         void onNewChatAdded();
     }
@@ -65,9 +70,15 @@ public class ChatActivity extends AppCompatActivity
     private FragmentManager fragmentManager;
     private FloatingActionButton fab;
 
+    public static int tabSelected;
+
+    public static MenuItem itemChat;
+    public static MenuItem itemContact;
+
     public void setOnContactAddListener(OnContactAdded listener) {
         this.contactAddListener = listener;
     }
+
     public void setOnNewChatAddedListener(OnNewChatAdded listener) {
         this.chatAddListener = listener;
     }
@@ -102,6 +113,8 @@ public class ChatActivity extends AppCompatActivity
         transaction.replace(R.id.container, TabsFragment.newInstance(Tabs.Chat));
         transaction.addToBackStack(null);
         transaction.commit();
+
+
     }
 
     @Override
@@ -118,6 +131,15 @@ public class ChatActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.chat, menu);
+        itemChat = menu.findItem(R.id.action_add_chat);
+        itemContact = menu.findItem(R.id.action_add_contact);
+        if (getVisibleFragment() == 0) {
+            itemContact.setVisible(false);
+            itemChat.setVisible(true);
+        } else {
+            itemContact.setVisible(true);
+            itemChat.setVisible(false);
+        }
         return true;
     }
 
@@ -132,6 +154,7 @@ public class ChatActivity extends AppCompatActivity
                 return true;
 
             case R.id.action_add_contact:
+                getVisibleFragment();
                 addContact();
                 //ContactList cl = new ContactList();
                 //cl.onRefresh();
@@ -251,21 +274,15 @@ public class ChatActivity extends AppCompatActivity
 
         mAddChatRoomBtn.setOnClickListener(v -> {
             if (!mChatRoomName.getText().toString().isEmpty()) {
-                Date currentTime = Calendar.getInstance().getTime();
-                String time = (currentTime.getHours() + 1) + ":"
-                        + (currentTime.getMinutes() + 1) + ":"
-                        + (currentTime.getSeconds() + 1) + " "
-                        + currentTime.getDate() + "."
-                        + (currentTime.getMonth() + 1) + "."
-                        + (currentTime.getYear() + 1900);
-                Log.d(TAG, "Time: " + time);
-                mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mChatRoomName.getText().toString(), time));
+                mTime = getTime();
+                Log.d(TAG, "Time: " + mTime);
+                mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mChatRoomName.getText().toString(), mTime));
                 for (int i = 0; i < mPocketDao.getChats().size(); i++) {
                     Log.d(TAG, "addChatRoom: " + mPocketDao.getChats().get(i).getId() + " name: " + mPocketDao.getChats().get(i).getChatName());
                 }
-                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), time));
+                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), mTime));
 
-                Log.d(TAG, "addLink: " + mPocketDao.getLinks().size() + " | " + mPocketDao.getUser().getId() + " | chats.size: " + (mPocketDao.getChats().size() - 1) + " | " + time
+                Log.d(TAG, "addLink: " + mPocketDao.getLinks().size() + " | " + mPocketDao.getUser().getId() + " | chats.size: " + (mPocketDao.getChats().size() - 1) + " | " + mTime
                 );
 
                 for (int i = 0; i < mPocketDao.getLinks().size(); i++) {
@@ -274,7 +291,7 @@ public class ChatActivity extends AppCompatActivity
 
                 Log.d(TAG, mChatRoomName.getText().toString());
 
-                Toast.makeText(ChatActivity.this, "ChatRoom successfully created at: " + time, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "ChatRoom successfully created at: " + mTime, Toast.LENGTH_SHORT).show();
                 if (contactAddListener != null) chatAddListener.onNewChatAdded();
                 addChatRoomDialog.dismiss();
             } else {
@@ -284,6 +301,69 @@ public class ChatActivity extends AppCompatActivity
         });
 
         addChatRoomDialog.show();
+    }
+
+    private String getTime() {
+        Date currentTime = Calendar.getInstance().getTime();
+        String time = (currentTime.getHours() + 1) + ":"
+                + (currentTime.getMinutes() + 1) + ":"
+                + (currentTime.getSeconds() + 1) + " "
+                + currentTime.getDate() + "."
+                + (currentTime.getMonth() + 1) + "."
+                + (currentTime.getYear() + 1900);
+        return time;
+    }
+
+    public int getVisibleFragment() {
+
+        Log.d(TAG, "getVisibleFragment: " + tabSelected + " ");
+        return tabSelected;
+    }
+
+    public static void setTabSelected(int id) {
+        tabSelected = id;
+        if (itemContact != null && itemChat != null) {
+            if (id == 0) {
+                itemContact.setVisible(false);
+                itemChat.setVisible(true);
+            } else {
+                itemContact.setVisible(true);
+                itemChat.setVisible(false);
+            }
+        }
+
+    }
+
+    @Override
+    public void onContactClick(Integer userId) {
+
+        String mContactName = mPocketDao.getOneContact(userId).getUserName();
+        Toast.makeText(this, "Contact's ID: " + userId + " Name: " + mContactName, Toast.LENGTH_SHORT).show();
+
+        mTime = getTime();
+        if (mPocketDao.getChats().size() != 0) {
+
+            try {
+                ChatsTable mChat = mPocketDao.getChatWithName(mContactName);
+                Log.d(TAG, "onChatGet: ID=" + mChat.getId());
+                setMessageScreen(String.valueOf(mChat.getId()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "onChatGet: NO CHAT!");
+                if(mPocketDao.getUser().getServerUserId() != userId) {
+                    mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mContactName, mTime));
+                    mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), mTime));
+                    mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), userId, (mPocketDao.getChats().size() - 1), mTime));
+                    if (contactAddListener != null) chatAddListener.onNewChatAdded();
+                    setMessageScreen(String.valueOf((mPocketDao.getChats().size() - 1)));
+                    Toast.makeText(this, "ChatRoom Created!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "This is your contact. Select another user.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+
     }
 
 }
