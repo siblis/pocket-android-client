@@ -239,7 +239,7 @@ public class ChatActivity extends AppCompatActivity
         mAddContactBtn.setOnClickListener(v -> {
             String email = mEmail.getText().toString();
             if (!email.isEmpty() && Correct.isValidEmail(email)) {
-                //TODO Сделать поиск контакта на сервере! (ID, Name, Email)
+
                 String newUserJSON = RestUtils.addContact(email, mPocketDao);
 
                 if (!TextUtils.isEmpty(newUserJSON) && !newUserJSON.equals("User does not exists") && !newUserJSON.equals("Contact already in list")) {
@@ -275,22 +275,8 @@ public class ChatActivity extends AppCompatActivity
         mAddChatRoomBtn.setOnClickListener(v -> {
             if (!mChatRoomName.getText().toString().isEmpty()) {
                 mTime = getTime();
-                Log.d(TAG, "Time: " + mTime);
                 mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mChatRoomName.getText().toString(), mTime));
-                for (int i = 0; i < mPocketDao.getChats().size(); i++) {
-                    Log.d(TAG, "addChatRoom: " + mPocketDao.getChats().get(i).getId() + " name: " + mPocketDao.getChats().get(i).getChatName());
-                }
                 mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), mTime));
-
-                Log.d(TAG, "addLink: " + mPocketDao.getLinks().size() + " | " + mPocketDao.getUser().getId() + " | chats.size: " + (mPocketDao.getChats().size() - 1) + " | " + mTime
-                );
-
-                for (int i = 0; i < mPocketDao.getLinks().size(); i++) {
-                    Log.d(TAG, "Links: " + mPocketDao.getLinks().get(i).getId() + " user: " + mPocketDao.getLinks().get(i).getUserId() + " chat id:" + mPocketDao.getLinks().get(i).getChatId());
-                }
-
-                Log.d(TAG, mChatRoomName.getText().toString());
-
                 Toast.makeText(ChatActivity.this, "ChatRoom successfully created at: " + mTime, Toast.LENGTH_SHORT).show();
                 if (contactAddListener != null) chatAddListener.onNewChatAdded();
                 addChatRoomDialog.dismiss();
@@ -341,25 +327,23 @@ public class ChatActivity extends AppCompatActivity
         Toast.makeText(this, "Contact's ID: " + userId + " Name: " + mContactName, Toast.LENGTH_SHORT).show();
 
         mTime = getTime();
-        if (mPocketDao.getChats().size() != 0) {
 
-            try {
-                ChatsTable mChat = mPocketDao.getChatWithName(mContactName);
-                Log.d(TAG, "onChatGet: ID=" + mChat.getId());
-                setMessageScreen(String.valueOf(mChat.getId()));
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.d(TAG, "onChatGet: NO CHAT!");
-                if(mPocketDao.getUser().getServerUserId() != userId) {
-                    mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mContactName, mTime));
-                    mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), mTime));
-                    mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), userId, (mPocketDao.getChats().size() - 1), mTime));
-                    if (contactAddListener != null) chatAddListener.onNewChatAdded();
-                    setMessageScreen(String.valueOf((mPocketDao.getChats().size() - 1)));
-                    Toast.makeText(this, "ChatRoom Created!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "This is your contact. Select another user.", Toast.LENGTH_SHORT).show();
-                }
+        try {
+            ChatsTable mChat = mPocketDao.getChatWithName(mContactName);
+            Log.d(TAG, "onChatGet: ID=" + mChat.getId());
+            setMessageScreen(String.valueOf(mChat.getId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "onChatGet: NO CHAT!");
+            if (mPocketDao.getUser().getServerUserId() != userId) {
+                mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mContactName, mTime));
+                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), mTime));
+                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), userId, (mPocketDao.getChats().size() - 1), mTime));
+                if (contactAddListener != null) chatAddListener.onNewChatAdded();
+                setMessageScreen(String.valueOf((mPocketDao.getChats().size() - 1)));
+                Toast.makeText(this, "ChatRoom Created!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "This is your contact. Select another user.", Toast.LENGTH_SHORT).show();
             }
         }
 

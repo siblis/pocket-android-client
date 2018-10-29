@@ -6,7 +6,7 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 
 @Entity(foreignKeys = {
-        @ForeignKey(entity = ContactsTable.class, parentColumns = "id",childColumns = "from_id")})
+        @ForeignKey(entity = ContactsTable.class, parentColumns = "id", childColumns = "from_id")})
 public class MessagesTable {
 
     @PrimaryKey
@@ -25,15 +25,19 @@ public class MessagesTable {
     @ColumnInfo(name = "date")
     private String mDate;
 
+    @ColumnInfo(name = "status")
+    private int mStatus;
+
     public MessagesTable() {
     }
 
-    public MessagesTable(int id, int fromId, int toId, String message, String date) {
+    public MessagesTable(int id, int fromId, int toId, String message, String date, int status) {
         mId = id;
         mFromId = fromId;
         mToId = toId;
         mMessage = message;
         mDate = date;
+        mStatus = status;
     }
 
     public int getId() {
@@ -75,4 +79,13 @@ public class MessagesTable {
     public void setDate(String date) {
         mDate = date;
     }
+
+    public int getStatus() {
+        return mStatus;
+    }
+
+    public void setStatus(int status) {
+        mStatus = status;
+    }
+
 }

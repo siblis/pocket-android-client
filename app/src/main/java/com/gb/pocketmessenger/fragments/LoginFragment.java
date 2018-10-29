@@ -216,9 +216,11 @@ public class LoginFragment extends Fragment {
         Log.d(TAG, "getContactsList: " + newContactsList);
         List<ContactsTable> mContactsList;
         mContactsList = JsonParser.parseContacts(newContactsList);
-        for (int i = 0; i < mContactsList.size(); i++) {
-            mPocketDao.insertContact(mContactsList.get(i));
-            Log.d(TAG, "Contact " + i + " added to DataBase");
+        if (mContactsList != null) {
+            for (int i = 0; i < mContactsList.size(); i++) {
+                mPocketDao.insertContact(mContactsList.get(i));
+                Log.d(TAG, "Contact " + i + " added to DataBase");
+            }
         }
 
     }
