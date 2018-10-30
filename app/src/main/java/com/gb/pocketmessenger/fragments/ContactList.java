@@ -1,5 +1,6 @@
 package com.gb.pocketmessenger.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,9 +26,18 @@ public class ContactList extends Fragment implements SwipeRefreshLayout.OnRefres
     private final ContactsAdapter mContactsAdapter = new ContactsAdapter();
     private PocketDao mPocketDao;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ContactsAdapter.OnItemClickListener mListener;
 
     public static ContactList newInstance() {
         return new ContactList();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if(context instanceof ContactsAdapter.OnItemClickListener) {
+            mListener = (ContactsAdapter.OnItemClickListener) context;
+        }
     }
 
     @Nullable
@@ -52,6 +62,7 @@ public class ContactList extends Fragment implements SwipeRefreshLayout.OnRefres
         mContactsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         mContactsAdapter.addData(mPocketDao.getContacts());
         mContactsRecycler.setAdapter(mContactsAdapter);
+        mContactsAdapter.setListener(mListener);
     }
 
     public void adapterReload() {
@@ -72,4 +83,9 @@ public class ContactList extends Fragment implements SwipeRefreshLayout.OnRefres
         mContactsAdapter.addData(mPocketDao.getContacts());
     }
 
+    @Override
+    public void onDetach() {
+        mListener = null;
+        super.onDetach();
+    }
 }

@@ -7,6 +7,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +26,11 @@ public class TabsFragment extends Fragment{
         Bundle bundle = new Bundle();
         switch (tab) {
             case Chat:
+                ChatActivity.setTabSelected(0);
                 bundle.putInt(ARG_IND, 0);
                 break;
             case Contacts:
+                ChatActivity.setTabSelected(1);
                 bundle.putInt(ARG_IND, 1);
                 break;
         }
@@ -54,7 +57,27 @@ public class TabsFragment extends Fragment{
         TabLayout tabLayout = view.findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
 
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int position = tab.getPosition();
+                Log.d("tar", "onTabSelected: " + position);
+                ChatActivity.setTabSelected(position);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
         return view;
     }
+
 
 }

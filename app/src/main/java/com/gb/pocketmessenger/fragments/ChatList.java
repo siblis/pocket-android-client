@@ -79,6 +79,7 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
                 Log.d(TAG, "Users from chat: " + mPocketDao.getUsersFromChat(i).get(k).getId() + " name: " + mPocketDao.getUsersFromChat(i).get(k).getUserName());
             }
             dialogs.add(new Dialog(String.valueOf(mChatsList.get(i).getId()), mChatsList.get(i).getChatName(), getChatUsers(mChatsList.get(i).getId())));
+
         }
         return dialogs;
     }

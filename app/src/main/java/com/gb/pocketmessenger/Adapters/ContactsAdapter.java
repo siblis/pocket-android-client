@@ -18,6 +18,7 @@ import java.util.Objects;
 public class ContactsAdapter extends RecyclerView.Adapter<ContactHolder> {
 
     private List<ContactsTable> mContactsList;
+    private OnItemClickListener mListener;
 
     @NonNull
     @Override
@@ -30,6 +31,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactHolder> {
     @Override
     public void onBindViewHolder(@NonNull ContactHolder holder, int position) {
         holder.bind(mContactsList.get(position));
+        holder.setListener(mListener);
     }
 
     @Override
@@ -44,5 +46,13 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactHolder> {
 
     public void reload() {
         notifyDataSetChanged();
+    }
+
+    public void setListener(OnItemClickListener listener) {
+        mListener = listener;
+    }
+
+    public interface OnItemClickListener {
+        void onContactClick(Integer userId);
     }
 }
