@@ -120,7 +120,7 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
 
     @Override
     public void onDialogLongClick(Dialog dialog) {
-
+        Toast.makeText(getContext(), "NJCNC", Toast.LENGTH_SHORT).show();
     }
 
     @Override

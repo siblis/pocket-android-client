@@ -59,7 +59,8 @@ public class PocketMessengerWssService extends Service {
         wssThread = Executors.newSingleThreadExecutor();
         Future<?> socketResult = wssThread.submit(() -> {
             try {
-                chatWebSocket = new WebSocketFactory().createSocket(CURRENT_SERVER + "/v1/ws_echo/");
+              //  chatWebSocket = new WebSocketFactory().createSocket(CURRENT_SERVER + "/v1/ws_echo/");
+                chatWebSocket = new WebSocketFactory().createSocket(CURRENT_SERVER + "/v1/ws/");
                 chatWebSocket.addHeader("token", token);
                 chatWebSocket.addExtension(WebSocketExtension.PERMESSAGE_DEFLATE);
                 chatWebSocket.addListener(new WebSocketAdapter() {

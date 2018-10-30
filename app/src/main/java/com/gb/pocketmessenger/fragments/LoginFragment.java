@@ -145,7 +145,7 @@ public class LoginFragment extends Fragment {
 
             Intent intent = new Intent(getActivity(), ChatActivity.class);
             startActivity(intent);
-            //loadChatMessagesFragment();
+
         } else {
             Toast.makeText(getContext(), "Incorrect Login or Password!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Incorrect Login or Password!");

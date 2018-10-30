@@ -37,7 +37,8 @@ public class JsonParser {
     public static String getWssMessage(Message message) {
         PocketMessage simpleMessage = new PocketMessage(message.receiver, message.text);
         Gson gson = new GsonBuilder().create();
-        return gson.toJson(simpleMessage, PocketMessage.class);
+        String result = gson.toJson(simpleMessage, PocketMessage.class);
+        return result;
     }
 
     public static IncomingMessage getIncomingMessage(String jsonMessage) {
