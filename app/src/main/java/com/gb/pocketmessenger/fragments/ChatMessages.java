@@ -68,6 +68,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         connector = WssConnector.getInstance();
         connector.setOnIncomingMessageListener(this);
         dialogId = getArguments().getString("DIALOG_ID", "");
+        Log.d(TAG, "onCreate: " + dialogId);
         mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
         List<User> chatUsers = getChatUsers(Integer.parseInt(dialogId));
         int myId = mPocketDao.getUser().getServerUserId();
@@ -117,36 +118,40 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         List<MessagesTable> messagesList = mPocketDao.getMessages();
         Date thedate;
 
+
         for (int i = 0; i < mPocketDao.getMessages().size(); i++) {
 
-            if(messagesList.get(i).getFromId() != mPocketDao.getUser().getServerUserId()) {
-                message = new Message(messagesList.get(i).getMessage());
-                message.user.id = String.valueOf(messagesList.get(i).getFromId());
-                message.receiver = String.valueOf(messagesList.get(i).getToId());
+            if (messagesList.get(i).getChatId() == Integer.valueOf(dialogId)) {
 
-                //TODO отпарсить String messagesList.get(i).getDate() в формат Date
-                try {
-                    thedate = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).parse(messagesList.get(i).getDate());
-                    Log.d(TAG, "------ Date: " + messagesList.get(i).getDate() + " / " + thedate);
-                    message.setCreatedAt(thedate);
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                if (messagesList.get(i).getFromId() != mPocketDao.getUser().getServerUserId()) {
+                    message = new Message(messagesList.get(i).getMessage());
+                    message.user.id = String.valueOf(messagesList.get(i).getFromId());
+                    message.receiver = String.valueOf(messagesList.get(i).getToId());
+
+                    //TODO отпарсить String messagesList.get(i).getDate() в формат Date
+                    try {
+                        thedate = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).parse(messagesList.get(i).getDate());
+                        Log.d(TAG, "------ Date: " + messagesList.get(i).getDate() + " / " + thedate);
+                        message.setCreatedAt(thedate);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                    messageAdapter.addToStart(message, true);
+                } else {
+                    message = new Message(messagesList.get(i).getMessage());
+                    message.user.id = senderId;
+                    message.receiver = String.valueOf(messagesList.get(i).getToId());
+
+                    try {
+                        thedate = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).parse(messagesList.get(i).getDate());
+                        message.setCreatedAt(thedate);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                    messageAdapter.addToStart(message, true);
                 }
-
-                messageAdapter.addToStart(message, true);
-            } else {
-                message = new Message(messagesList.get(i).getMessage());
-                message.user.id = senderId;
-                message.receiver = String.valueOf(messagesList.get(i).getToId());
-
-                try {
-                    thedate = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).parse(messagesList.get(i).getDate());
-                    message.setCreatedAt(thedate);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                messageAdapter.addToStart(message, true);
             }
 
         }
@@ -206,7 +211,8 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
                 mPocketDao.getUser().getServerUserId(),
                 Integer.valueOf(receiver),
                 input.toString(),
-                String.valueOf(new Date()), 0));
+                String.valueOf(new Date()),
+                Integer.valueOf(dialogId), 0));
 
         newMessage(message);
 
@@ -224,7 +230,8 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
                     Integer.valueOf(receiverId),
                     mPocketDao.getUser().getServerUserId(),
                     incomingMessage,
-                    String.valueOf(new Date()), 0));
+                    String.valueOf(new Date()),
+                    Integer.valueOf(dialogId), 0));
 
             newMessage(newMessage);
 

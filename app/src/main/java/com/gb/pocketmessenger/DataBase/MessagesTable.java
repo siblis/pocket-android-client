@@ -25,18 +25,22 @@ public class MessagesTable {
     @ColumnInfo(name = "date")
     private String mDate;
 
+    @ColumnInfo(name = "chat_id")
+    private int mChatId;
+
     @ColumnInfo(name = "status")
     private int mStatus;
 
     public MessagesTable() {
     }
 
-    public MessagesTable(int id, int fromId, int toId, String message, String date, int status) {
+    public MessagesTable(int id, int fromId, int toId, String message, String date, int chatId, int status) {
         mId = id;
         mFromId = fromId;
         mToId = toId;
         mMessage = message;
         mDate = date;
+        mChatId = chatId;
         mStatus = status;
     }
 
@@ -88,4 +92,11 @@ public class MessagesTable {
         mStatus = status;
     }
 
+    public int getChatId() {
+        return mChatId;
+    }
+
+    public void setChatId(int chatId) {
+        mChatId = chatId;
+    }
 }
