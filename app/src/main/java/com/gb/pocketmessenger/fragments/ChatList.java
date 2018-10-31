@@ -70,14 +70,15 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
         chats.setAdapter(chatListAdapter);
     }
 
-    private List<Dialog> getDialogList(){
+    private List<Dialog> getDialogList() {
         List<ChatsTable> mChatsList = mPocketDao.getChats();
         dialogs = new ArrayList<>();
         for (int i = 0; i < mChatsList.size(); i++) {
             //TODO Метод PocketDao.getUsersFromChat() работает не верно! Разобраться почему. Пока не использовать в коде. Пример использования в логе ниже. Выдает неверные данные.
-            for (int k = 0; k < mPocketDao.getUsersFromChat(i).size(); k++) {
-                Log.d(TAG, "Users from chat: " + mPocketDao.getUsersFromChat(i).get(k).getId() + " name: " + mPocketDao.getUsersFromChat(i).get(k).getUserName());
-            }
+//            for (int k = 0; k < mPocketDao.getUsersFromChat(i).size(); k++) {
+//                Log.d(TAG, "Users from chat: " + mPocketDao.getUsersFromChat(i).get(k).getId() + " name: " + mPocketDao.getUsersFromChat(i).get(k).getUserName());
+//           }
+            Log.d(TAG, "getChat: " + mChatsList.get(i).getId() + " name: " + mChatsList.get(i).getChatName() + "----------------");
             dialogs.add(new Dialog(String.valueOf(mChatsList.get(i).getId()), mChatsList.get(i).getChatName(), getChatUsers(mChatsList.get(i).getId())));
 
         }
