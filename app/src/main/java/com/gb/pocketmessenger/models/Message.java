@@ -22,6 +22,13 @@ public class Message implements IMessage {
         this.user = new User();
     }
 
+    public Message(String text, String id, Date createdAt, User user, String receiver) {
+        this.text = text;
+        this.Id = id;
+        this.CreatedAt = createdAt;
+        this.user = user;
+        this.receiver = receiver;
+    }
 
     @Override
     public String getId() {
@@ -41,5 +48,9 @@ public class Message implements IMessage {
     @Override
     public Date getCreatedAt() {
         return CreatedAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.CreatedAt = createdAt;
     }
 }
