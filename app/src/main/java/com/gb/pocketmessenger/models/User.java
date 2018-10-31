@@ -36,6 +36,14 @@ public class User implements IUser {
         this.eMail = email;
     }
 
+    public User(String login, String password, String eMail, String token, String id) {
+        this.login = login;
+        this.password = password;
+        this.eMail = eMail;
+        this.token = token;
+        this.id = id;
+    }
+
     public String getLogin() {
         return login;
     }

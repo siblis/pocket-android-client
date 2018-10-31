@@ -12,29 +12,24 @@ import java.util.List;
 @Dao
 public interface PocketDao {
 
+    //-----------UserTable----------------------------------
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertUser(UserTable user);
+
+    @Delete
+    void deleteUser(UserTable userTable);
+
+    @Query("SELECT * FROM usertable WHERE id = 0")
+    UserTable getUser();
+
+    //-----------ChatsTable----------------------------------
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertChats(List<ChatsTable> chats);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertChat(ChatsTable chat);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertContacts(List<ContactsTable> contacts);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertContact(ContactsTable contact);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertMessages(List<MessagesTable> messages);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void setLinksUsersChats(List<UsersChatsTable> linksUsersChats);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void setOneLinkUserToChat(UsersChatsTable linkUsersChats);
 
     @Query("SELECT * FROM chatstable")
     List<ChatsTable> getChats();
@@ -48,36 +43,58 @@ public interface PocketDao {
     @Query("SELECT * FROM chatstable WHERE chat_name = :chatName")
     ChatsTable getChatWithName(String chatName);
 
+    //-----------UsersChatsTable-------------------------------
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void setLinksUsersChats(List<UsersChatsTable> linksUsersChats);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void setOneLinkUserToChat(UsersChatsTable linkUsersChats);
+
     @Query("SELECT * FROM userschatstable")
     List<UsersChatsTable> getLinks();
-
-    @Delete
-    void deleteChat(ChatsTable chatsTable);
 
     @Query("SELECT * FROM contactstable INNER JOIN userschatstable ON contactstable.id WHERE chat_id = :chatId")
     List<ContactsTable> getUsersFromChat(int chatId);
 
-    @Query("SELECT * FROM messagestable WHERE to_id = :chatOrUserId")
-    List<MessagesTable> getMessagesToId(int chatOrUserId);
+    @Delete
+    void deleteChat(ChatsTable chatsTable);
+
+    //-----------ContactsTable----------------------------------
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertContacts(List<ContactsTable> contacts);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertContact(ContactsTable contact);
 
     @Query("SELECT * FROM contactstable WHERE id = :UserId")
     ContactsTable getOneContact(int UserId);
-
-    @Delete
-    void deleteContact(ContactsTable contactsTable);
-
-    @Delete
-    void deleteMessage(MessagesTable messagesTable);
 
     @Query("SELECT * FROM contactstable")
     List<ContactsTable> getContacts();
 
     @Delete
-    void deleteUser(UserTable userTable);
+    void deleteContact(ContactsTable contact);
 
-    @Query("SELECT * FROM usertable WHERE id = 0")
-    UserTable getUser();
+    //-----------MessagesTable---------------------------------
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertMessages(List<MessagesTable> messages);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertMessage(MessagesTable message);
+
+    @Query("SELECT * FROM messagestable WHERE to_id = :chatOrUserId")
+    List<MessagesTable> getMessagesToId(int chatOrUserId);
+
+    @Query("SELECT * FROM messagestable WHERE to_id = :chatOrUserId AND status = :status")
+    List<MessagesTable> getMessagesToIdWithStatus(int chatOrUserId, String status);
+
+    @Query("SELECT * FROM messagestable")
+    List<MessagesTable> getMessages();
+
+    @Delete
+    void deleteMessage(MessagesTable message);
 
 }
