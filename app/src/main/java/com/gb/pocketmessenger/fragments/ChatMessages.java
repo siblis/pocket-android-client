@@ -103,15 +103,15 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     public void newMessage(Message message) {
         messageAdapter.addToStart(message, true);
 
-        Log.d(TAG, "-------------------------");
-        for (int i = 0; i < mPocketDao.getMessages().size(); i++) {
-            Log.d(TAG, "Message " + i + ": " + mPocketDao.getMessages().get(i).getMessage() +
-                    " FROM: " + mPocketDao.getMessages().get(i).getFromId() +
-                    " TO:" + mPocketDao.getMessages().get(i).getToId() +
-                    " DATE: " + mPocketDao.getMessages().get(i).getDate() +
-                    " STATUS: " + mPocketDao.getMessages().get(i).getStatus());
+//        Log.d(TAG, "-------------------------");
+//        for (int i = 0; i < mPocketDao.getMessages().size(); i++) {
+//            Log.d(TAG, "Message " + i + ": " + mPocketDao.getMessages().get(i).getMessage() +
+//                    " FROM: " + mPocketDao.getMessages().get(i).getFromId() +
+//                    " TO:" + mPocketDao.getMessages().get(i).getToId() +
+//                    " DATE: " + mPocketDao.getMessages().get(i).getDate() +
+//                    " STATUS: " + mPocketDao.getMessages().get(i).getStatus());
 
-        }
+//        }
     }
 
     public void getMessagesFromDB() {
@@ -157,19 +157,14 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         }
 
         // В логах список сообщений из базы
-        Log.d(TAG, "-------------------------");
-        for (int i = 0; i < mPocketDao.getMessages().size(); i++) {
-            User userTo = new User(mPocketDao.getOneContact(messagesList.get(i).getFromId()).getUserName(), "",
-                    mPocketDao.getOneContact(messagesList.get(i).getFromId()).getEmail(), "",
-                    String.valueOf(messagesList.get(i).getFromId()));
-            Log.d(TAG, "Message " + i + ": " + messagesList.get(i).getMessage() +
-                    " ID: " + String.valueOf(messagesList.get(i).getId()) +
-                    " TO: " + userTo.getId() + "/" + userTo.geteMail() +
-                    //" TO: " + mPocketDao.getOneContact(messagesList.get(i).getFromId()).getEmail() +
-                    " DATE: " + messagesList.get(i).getDate() +
-                    " STATUS: " + String.valueOf(messagesList.get(i).getStatus()));
-
-        }
+//        Log.d(TAG, "-------------------------");
+//        for (int i = 0; i < mPocketDao.getMessages().size(); i++) {
+//            User userTo = new User(mPocketDao.getOneContact(messagesList.get(i).getFromId()).getUserName(), "",
+//                    mPocketDao.getOneContact(messagesList.get(i).getFromId()).getEmail(), "",
+//                   String.valueOf(messagesList.get(i).getFromId()));
+//            Log.d(TAG, "Message " + i + ": " + messagesList.get(i).getMessage() + " ID: " + String.valueOf(messagesList.get(i).getId()) + " TO: " + userTo.getId() + "/" + userTo.geteMail() + " DATE: " + messagesList.get(i).getDate() + " STATUS: " + String.valueOf(messagesList.get(i).getStatus()));
+//
+//        }
     }
 
     @Override
@@ -224,17 +219,25 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         if (receiverId != null && incomingMessage != null) {
             Message newMessage = new Message(incomingMessage);
             newMessage.user.id = receiverId;
+            String userName = null;
+            for (int i = 0; i < mPocketDao.getContacts().size(); i++) {
+                if (mPocketDao.getContacts().get(i).getId() == Integer.valueOf(receiverId)) {
+                    userName = mPocketDao.getContacts().get(i).getUserName();
+                    Log.d(TAG, "onSubmit: FROM = " +userName + " ID=" + Integer.valueOf(receiverId) + " TO = " + mPocketDao.getUser().getServerUserId() + " TEXT = " + incomingMessage);
+                    mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
+                            Integer.valueOf(receiverId),
+                            mPocketDao.getUser().getServerUserId(),
+                            incomingMessage,
+                            String.valueOf(new Date()),
+                            Integer.valueOf(dialogId), 0));
 
-            Log.d(TAG, "onSubmit: FROM = " + Integer.valueOf(receiverId) + " TO = " + mPocketDao.getUser().getServerUserId() + " TEXT = " + incomingMessage);
-            mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
-                    Integer.valueOf(receiverId),
-                    mPocketDao.getUser().getServerUserId(),
-                    incomingMessage,
-                    String.valueOf(new Date()),
-                    Integer.valueOf(dialogId), 0));
-
-            newMessage(newMessage);
-
+                    newMessage(newMessage);
+                }
+            }
+            if (userName == null) {
+                //TODO Получаем контакт по ID и создаем комнату
+                Log.d(TAG, "New User!");
+            }
         }
     }
 
