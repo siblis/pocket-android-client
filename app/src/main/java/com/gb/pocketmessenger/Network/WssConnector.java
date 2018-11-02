@@ -9,9 +9,14 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import com.gb.pocketmessenger.DataBase.MessagesTable;
+import com.gb.pocketmessenger.DataBase.PocketDao;
+import com.gb.pocketmessenger.DataBase.PocketDataBase;
 import com.gb.pocketmessenger.models.IncomingMessage;
 import com.gb.pocketmessenger.services.PocketMessengerWssService;
 import com.gb.pocketmessenger.utils.JsonParser;
+
+import java.util.Date;
 
 import static com.gb.pocketmessenger.Constants.MESSAGE_BODY;
 import static com.gb.pocketmessenger.Constants.WEBSOCKET_MESSAGE_TAG;
@@ -27,6 +32,7 @@ public class WssConnector {
     private Context context;
     private static OnIncomingMessage listener;
     private static OnWssConnected wssListener;
+    private static PocketDao mPocketDao;
 
     public interface OnIncomingMessage {
         void onIncomingMessage(String receiverId, String incomingMessage);
@@ -36,14 +42,15 @@ public class WssConnector {
         void onWssConnected();
     }
 
-    private WssConnector(Context context) {
+    private WssConnector(Context context, PocketDao mPocketDao) {
         this.context = context;
+        WssConnector.mPocketDao = mPocketDao;
     }
 
-    public static void initInstance(Context context) {
+    public static void initInstance(Context context, PocketDao mPocketDao) {
         if (connector == null) {
-            receiverInit(context);
-            connector = new WssConnector(context);
+            receiverInit(context, mPocketDao);
+            connector = new WssConnector(context, mPocketDao);
         }
     }
 
@@ -59,16 +66,31 @@ public class WssConnector {
         return connector;
     }
 
-    private static void receiverInit(Context context) {
+    private static void receiverInit(Context context, PocketDao mPocketDao) {
         messageReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String jsonMsg = intent.getStringExtra(MESSAGE_BODY);
                 if (jsonMsg != null) {
                     IncomingMessage message = JsonParser.getIncomingMessage(jsonMsg);
-                    Toast.makeText(context, message.getMessage(), Toast.LENGTH_SHORT).show();
-                    if (listener != null)
-                        listener.onIncomingMessage(message.getSenderid(), message.getMessage());
+                    if (message.getServerResponse() != null) {
+                        Toast.makeText(context, "Сообщение отправлено", Toast.LENGTH_SHORT).show();
+                    } else {
+                        if (listener != null)
+                            listener.onIncomingMessage(message.getSenderid(), message.getMessage());
+
+                        Toast.makeText(context, "Входящее сообщение от " + message.getSenderName(), Toast.LENGTH_SHORT).show();
+
+// Здесь нужно добавить есть ли у нас чат с этим человеком, если есть - получаем dialogID, если нет - создаем новый чат-рум
+
+
+//                        mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
+//                                Integer.valueOf(message.getReceiver()),
+//                                mPocketDao.getUser().getServerUserId(),
+//                                message.getMessage(),
+//                                String.valueOf(new Date()),
+//                                Integer.valueOf(dialogId), 0)); // здесь мы будем статус всегда устанавливать как непрочитанное, а в
+                    }                                                  // ChatMessages, при загрузке диалога - устанавливать все как прочитанное
                 }
             }
         };

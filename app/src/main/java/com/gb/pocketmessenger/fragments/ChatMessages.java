@@ -199,42 +199,35 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         message = new Message(input.toString());
         message.user.id = senderId;
         message.receiver = receiver;
-        if (connector != null)
+        if (connector != null) {
             WssConnector.sendMessage(JsonParser.getWssMessage(message));
-        else Toast.makeText(getContext(), "Ошибка отправки сообщения", Toast.LENGTH_SHORT).show();
-        //send
-        //save to DB
+            mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
+                    mPocketDao.getUser().getServerUserId(),
+                    Integer.valueOf(receiver),
+                    input.toString(),
+                    String.valueOf(new Date()),
+                    Integer.valueOf(dialogId), 0));
 
-        Log.d(TAG, "onSubmit: FROM = " + mPocketDao.getUser().getServerUserId() + " TO = " + Integer.valueOf(receiver) + " TEXT = " + input.toString());
+            newMessage(message);
 
-        mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
-                mPocketDao.getUser().getServerUserId(),
-                Integer.valueOf(receiver),
-                input.toString(),
-                String.valueOf(new Date()),
-                Integer.valueOf(dialogId), 0));
-
-        newMessage(message);
-
-        return true;
+            return true;
+        } else {
+            Toast.makeText(getContext(), "Ошибка отправки сообщения", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "onSubmit: FROM = " + mPocketDao.getUser().getServerUserId() + " TO = " + Integer.valueOf(receiver) + " TEXT = " + input.toString());
+            return false;
+        }
     }
 
     @Override
     public void onIncomingMessage(String receiverId, String incomingMessage) {
-        if (receiverId != null && incomingMessage != null) {
+
+        //  здесь мы проверяем, в ту ли комнату отображается сообщение.. и если в ту- рисуем его
+
+        if (receiverId.equals(receiver)) {
             Message newMessage = new Message(incomingMessage);
             newMessage.user.id = receiverId;
-
             Log.d(TAG, "onSubmit: FROM = " + Integer.valueOf(receiverId) + " TO = " + mPocketDao.getUser().getServerUserId() + " TEXT = " + incomingMessage);
-            mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
-                    Integer.valueOf(receiverId),
-                    mPocketDao.getUser().getServerUserId(),
-                    incomingMessage,
-                    String.valueOf(new Date()),
-                    Integer.valueOf(dialogId), 0));
-
             newMessage(newMessage);
-
         }
     }
 
