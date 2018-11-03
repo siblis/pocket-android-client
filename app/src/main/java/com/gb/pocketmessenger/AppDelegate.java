@@ -29,7 +29,7 @@ public class AppDelegate extends Application {
         mPocketDatabase = Room.databaseBuilder(getApplicationContext(), PocketDataBase.class,"pocket_database")
                 .allowMainThreadQueries()
                 .build();
-        WssConnector.initInstance(getApplicationContext());
+        WssConnector.initInstance(getApplicationContext(), mPocketDatabase.getPocketDao());
     }
 
     public PocketDataBase getPocketDatabase() {
