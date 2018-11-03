@@ -7,11 +7,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.gb.pocketmessenger.DataBase.ChatsTable;
+import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.MessagesTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.PocketDataBase;
+import com.gb.pocketmessenger.DataBase.UsersChatsTable;
 import com.gb.pocketmessenger.models.IncomingMessage;
 import com.gb.pocketmessenger.services.PocketMessengerWssService;
 import com.gb.pocketmessenger.utils.JsonParser;
@@ -33,6 +37,7 @@ public class WssConnector {
     private static OnIncomingMessage listener;
     private static OnWssConnected wssListener;
     private static PocketDao mPocketDao;
+    private static final String TAG = "tar";
 
     public interface OnIncomingMessage {
         void onIncomingMessage(String receiverId, String incomingMessage);
@@ -81,22 +86,52 @@ public class WssConnector {
 
                         Toast.makeText(context, "Входящее сообщение от " + message.getSenderName(), Toast.LENGTH_SHORT).show();
 
-// Здесь нужно добавить есть ли у нас чат с этим человеком, если есть - получаем dialogID, если нет - создаем новый чат-рум
+                        String chatName  = null;
+                        Log.d(TAG, "Incomming message: FROM = " + message.getSenderName() + " ID=" + Integer.valueOf(message.getSenderid()) + " TO = " + mPocketDao.getUser().getServerUserId() + " TEXT = " +
+                                message.getMessage());
 
 
-//                        mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
-//                                Integer.valueOf(message.getReceiver()),
-//                                mPocketDao.getUser().getServerUserId(),
-//                                message.getMessage(),
-//                                String.valueOf(new Date()),
-//                                Integer.valueOf(dialogId), 0)); // здесь мы будем статус всегда устанавливать как непрочитанное, а в
-                    }                                                  // ChatMessages, при загрузке диалога - устанавливать все как прочитанное
+                        for (int k = 0; k < mPocketDao.getChats().size(); k++) {
+                            if (mPocketDao.getChats().get(k).getChatName().equals(message.getSenderName())) {
+                                chatName = mPocketDao.getChats().get(k).getChatName();
+                                Log.d(TAG, "Found Chat with name: " + mPocketDao.getChats().get(k).getChatName());
+                                mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
+                                        Integer.valueOf(message.getSenderid()),
+                                        mPocketDao.getUser().getServerUserId(),
+                                        message.getMessage(),
+                                        String.valueOf(new Date()),
+                                        mPocketDao.getChats().get(k).getId(), 0));
+                            }
+                        }
+
+
+                    if (chatName == null) {
+
+                        Log.d(TAG, "New User!");
+                        mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), message.getSenderName(), String.valueOf(new Date())));
+                        mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
+                        //TODO надо получить email, и заменить в строке ниже вместо "xxx@xxx.xx".
+                        mPocketDao.insertContact(new ContactsTable(Integer.valueOf(message.getSenderid()), message.getSenderName(), "xxx@xxx.xx", false));
+                        mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), Integer.valueOf(message.getSenderid()), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
+                        mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
+                                Integer.valueOf(message.getSenderid()),
+                                mPocketDao.getUser().getServerUserId(),
+                                message.getMessage(),
+                                String.valueOf(new Date()),
+                                (mPocketDao.getChats().size()-1), 0));
+                        //TODO добавить автообновление списка чатов.
+                    }
+
+                    // ChatMessages, при загрузке диалога - устанавливать все как прочитанное
                 }
             }
-        };
-        IntentFilter intentFilter = new IntentFilter(WEBSOCKET_MESSAGE_TAG);
-        context.registerReceiver(messageReceiver, intentFilter);
+        }
     }
+
+    ;
+    IntentFilter intentFilter = new IntentFilter(WEBSOCKET_MESSAGE_TAG);
+        context.registerReceiver(messageReceiver,intentFilter);
+}
 
     public void bindWss(String token) {
         intent = new Intent(context, PocketMessengerWssService.class);
