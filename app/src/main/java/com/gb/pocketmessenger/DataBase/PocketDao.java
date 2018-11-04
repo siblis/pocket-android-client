@@ -43,6 +43,9 @@ public interface PocketDao {
     @Query("SELECT * FROM chatstable WHERE chat_name = :chatName")
     ChatsTable getChatWithName(String chatName);
 
+    @Query("DELETE FROM chatstable")
+    void clearChatsTable();
+
     //-----------UsersChatsTable-------------------------------
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -60,6 +63,9 @@ public interface PocketDao {
     @Delete
     void deleteChat(ChatsTable chatsTable);
 
+    @Query("DELETE FROM userschatstable")
+    void clearUsersChatsTable();
+
     //-----------ContactsTable----------------------------------
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -76,6 +82,9 @@ public interface PocketDao {
 
     @Delete
     void deleteContact(ContactsTable contact);
+
+    @Query("DELETE FROM contactstable")
+    void clearContactsTable();
 
     //-----------MessagesTable---------------------------------
 
@@ -96,5 +105,8 @@ public interface PocketDao {
 
     @Delete
     void deleteMessage(MessagesTable message);
+
+    @Query("DELETE FROM messagestable")
+    void clearMessagesTable();
 
 }

@@ -221,8 +221,14 @@ public class ChatActivity extends AppCompatActivity
     }
 
     private void logout() {
-        if (mPocketDao.getUser() != null)
+        if (mPocketDao.getUser() != null) {
             mPocketDao.deleteUser(mPocketDao.getUser());
+            //TODO Переделать на RxJava2 чтобы не грузить UI поток
+            mPocketDao.clearUsersChatsTable();
+            mPocketDao.clearChatsTable();
+            mPocketDao.clearMessagesTable();
+            mPocketDao.clearContactsTable();
+        }
         super.onBackPressed();
 
     }
