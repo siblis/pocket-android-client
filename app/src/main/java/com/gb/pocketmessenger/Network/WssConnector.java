@@ -14,7 +14,6 @@ import com.gb.pocketmessenger.DataBase.ChatsTable;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.MessagesTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
-import com.gb.pocketmessenger.DataBase.PocketDataBase;
 import com.gb.pocketmessenger.DataBase.UsersChatsTable;
 import com.gb.pocketmessenger.models.IncomingMessage;
 import com.gb.pocketmessenger.models.User;
@@ -37,6 +36,7 @@ public class WssConnector {
     private Context context;
     private static OnIncomingMessage listener;
     private static OnWssConnected wssListener;
+    private static OnUnknownContact newContactListener;
     private static PocketDao mPocketDao;
     private static final String TAG = "tar";
 
@@ -46,6 +46,10 @@ public class WssConnector {
 
     public interface OnWssConnected {
         void onWssConnected();
+    }
+
+    public interface OnUnknownContact {
+        void onUnknownContact();
     }
 
     private WssConnector(Context context, PocketDao mPocketDao) {
@@ -62,6 +66,10 @@ public class WssConnector {
 
     public void setOnIncomingMessageListener(OnIncomingMessage listener) {
         WssConnector.listener = listener;
+    }
+
+    public void setOnUnknownContactListener(OnUnknownContact newContactListener) {
+        WssConnector.newContactListener = newContactListener;
     }
 
     public void setOnWssConnectedListener(OnWssConnected wssListener) {
@@ -89,10 +97,12 @@ public class WssConnector {
                             listener.onIncomingMessage(message.getSenderid(), message.getMessage());
 
                         Toast.makeText(context, "Входящее сообщение от " + message.getSenderName(), Toast.LENGTH_SHORT).show();
-
-                        String chatName  = null;
+                        String chatName = null;
                         Log.d(TAG, "Incomming message: FROM = " + message.getSenderName() + " ID=" + Integer.valueOf(message.getSenderid()) + " TO = " + mPocketDao.getUser().getServerUserId() + " TEXT = " +
                                 message.getMessage());
+
+                        //TODO Я бы всю эту работу с БД перенес в отдельный класс и коллбэком в этот класс передавал бы данные, которые нужны
+                        //TODO так мы отделим базу данных от вебсокет-соединения
 
                         for (int k = 0; k < mPocketDao.getChats().size(); k++) {
                             if (mPocketDao.getChats().get(k).getChatName().equals(message.getSenderName())) {
@@ -107,37 +117,39 @@ public class WssConnector {
                             }
                         }
 
-                    if (chatName == null) {
+                        if (chatName == null) {
 
-                        Log.d(TAG, "New User!");
-                        mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), message.getSenderName(), String.valueOf(new Date())));
-                        mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
+                            Log.d(TAG, "New User!");
+                            mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), message.getSenderName(), String.valueOf(new Date())));
+                            mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
 
-                        User newUser = JsonParser.parseUser(RestUtils.getUserById(message.getSenderid(), mPocketDao));
-                        String email = newUser.geteMail();
+                            User newUser = JsonParser.parseUser(RestUtils.getUserById(message.getSenderid(), mPocketDao));
+                            String email = newUser.geteMail();
 
-                        mPocketDao.insertContact(new ContactsTable(Integer.valueOf(message.getSenderid()), message.getSenderName(), email, false));
+                            mPocketDao.insertContact(new ContactsTable(Integer.valueOf(message.getSenderid()), message.getSenderName(), email, false));
 
-                        mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), Integer.valueOf(message.getSenderid()), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
-                        mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
-                                Integer.valueOf(message.getSenderid()),
-                                mPocketDao.getUser().getServerUserId(),
-                                message.getMessage(),
-                                String.valueOf(new Date()),
-                                (mPocketDao.getChats().size()-1), 0));
-                        //TODO добавить автообновление списка чатов.
+                            mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), Integer.valueOf(message.getSenderid()), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
+                            mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
+                                    Integer.valueOf(message.getSenderid()),
+                                    mPocketDao.getUser().getServerUserId(),
+                                    message.getMessage(),
+                                    String.valueOf(new Date()),
+                                    (mPocketDao.getChats().size() - 1), 0));
+
+                            if (newContactListener != null)
+                                newContactListener.onUnknownContact();
+                        }
+
+                        // ChatMessages, при загрузке диалога - устанавливать все как прочитанное
                     }
-
-                    // ChatMessages, при загрузке диалога - устанавливать все как прочитанное
                 }
             }
         }
-    }
 
-    ;
-    IntentFilter intentFilter = new IntentFilter(WEBSOCKET_MESSAGE_TAG);
-        context.registerReceiver(messageReceiver,intentFilter);
-}
+        ;
+        IntentFilter intentFilter = new IntentFilter(WEBSOCKET_MESSAGE_TAG);
+        context.registerReceiver(messageReceiver, intentFilter);
+    }
 
     public void bindWss(String token) {
         intent = new Intent(context, PocketMessengerWssService.class);

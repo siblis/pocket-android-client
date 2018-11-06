@@ -15,6 +15,7 @@ import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.DataBase.ChatsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UsersChatsTable;
+import com.gb.pocketmessenger.Network.WssConnector;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.Dialog;
 import com.gb.pocketmessenger.models.Message;
@@ -28,12 +29,13 @@ import java.util.List;
 import java.util.Objects;
 
 public class ChatList extends Fragment implements DialogsListAdapter.OnDialogClickListener<Dialog>,
-        DialogsListAdapter.OnDialogLongClickListener<Dialog>, ChatActivity.OnNewChatAdded {
+        DialogsListAdapter.OnDialogLongClickListener<Dialog>, ChatActivity.OnNewChatAdded, WssConnector.OnUnknownContact {
     private List<Dialog> dialogs;
     private DialogsList chats;
     private DialogsListAdapter chatListAdapter;
     private PocketDao mPocketDao;
     private static final String TAG = "tar";
+    private WssConnector connector;
 
     public static ChatList newInstance() {
         return new ChatList();
@@ -43,6 +45,8 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
     public void onCreate(@Nullable Bundle savedInstanceState) {
         ((ChatActivity) getActivity()).setOnNewChatAddedListener(this);
         super.onCreate(savedInstanceState);
+        connector = WssConnector.getInstance();
+        connector.setOnUnknownContactListener(this);
         mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
     }
 
@@ -128,5 +132,10 @@ public class ChatList extends Fragment implements DialogsListAdapter.OnDialogCli
     public void onNewChatAdded() {
         getDialogList();
         setChatAdapter();
+    }
+
+    @Override
+    public void onUnknownContact() {
+        onNewChatAdded();
     }
 }
