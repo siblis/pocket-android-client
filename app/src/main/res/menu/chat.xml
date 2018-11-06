@@ -17,6 +17,14 @@
         android:icon="@drawable/ic_person_add"/>
 
     <item
+        android:id="@+id/action_add_user_to_chat"
+        android:orderInCategory="100"
+        android:title="Add Contact"
+        app:showAsAction="always"
+        android:visible="false"
+        android:icon="@drawable/ic_group_add"/>
+
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
