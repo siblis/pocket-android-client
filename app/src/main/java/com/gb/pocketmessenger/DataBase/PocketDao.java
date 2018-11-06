@@ -40,6 +40,9 @@ public interface PocketDao {
     @Query("SELECT * FROM chatstable WHERE id = :chatId")
     Cursor getChatWithIdCursor(int chatId);
 
+    @Query("SELECT * FROM chatstable WHERE id = :chatId")
+    ChatsTable getChatWithId(int chatId);
+
     @Query("SELECT * FROM chatstable WHERE chat_name = :chatName")
     ChatsTable getChatWithName(String chatName);
 

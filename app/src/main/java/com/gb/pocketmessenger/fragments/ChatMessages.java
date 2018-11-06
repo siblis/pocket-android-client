@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.gb.pocketmessenger.AppDelegate;
+import com.gb.pocketmessenger.ChatActivity;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.MessagesTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
@@ -45,7 +46,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
     private MessagesListAdapter<Message> messageAdapter;
     private Message message;
     private final String senderId = "0";    //TODO: get senderID
-    private String dialogId;
+    private static String dialogId;
     private WssConnector connector;
     private PocketDao mPocketDao;
     private String receiver;
@@ -96,6 +97,7 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
         input.setAttachmentsListener(this);
 
         getMessagesFromDB();
+        ChatActivity.setAddUserVisible(true);
 
         return view;
     }
@@ -236,5 +238,9 @@ public class ChatMessages extends Fragment implements MessageInput.InputListener
             }
         }
         return users;
+    }
+
+    public static int getDialogId() {
+        return Integer.valueOf(dialogId);
     }
 }

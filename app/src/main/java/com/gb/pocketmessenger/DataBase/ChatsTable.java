@@ -17,13 +17,26 @@ public class ChatsTable {
     @ColumnInfo(name = "creation_date")
     private String mCreationDate;
 
+    @ColumnInfo(name = "chat_type")
+    private int mType;
+
     public ChatsTable() {
     }
 
+    //----------Приватный чат------------
     public ChatsTable(int id, String chatName, String creationDate) {
         mId = id;
         mChatName = chatName;
         mCreationDate = creationDate;
+        mType = 1;
+    }
+
+    //----------Общий чат (передаем type=0)------------
+    public ChatsTable(int id, String chatName, String creationDate, int type) {
+        mId = id;
+        mChatName = chatName;
+        mCreationDate = creationDate;
+        mType = type;
     }
 
     public int getId() {
@@ -49,4 +62,8 @@ public class ChatsTable {
     public void setCreationDate(String creationDate) {
         mCreationDate = creationDate;
     }
+
+    public int getType() { return mType; }
+
+    public void setType(int type) { mType = type; }
 }
