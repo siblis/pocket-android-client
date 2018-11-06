@@ -27,7 +27,7 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
     public ConnectionToServer(String action, User user, PocketDao pocketDao) {
         this.action = action;
         this.user = user;
-        this.pocketDao  = pocketDao;
+        this.pocketDao = pocketDao;
     }
 
     @Override
@@ -55,7 +55,8 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
         JSONObject userJson = new JSONObject();
         try {
             userJson.put("account_name", user.getLogin());
-            if (user.geteMail() != null) userJson.put("email", user.geteMail());
+            if (user.geteMail() != null)
+                userJson.put("email", user.geteMail());
             userJson.put("password", user.getPassword());
         } catch (Exception e) {
             e.printStackTrace();
@@ -155,7 +156,8 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
 
                     JSONObject contact = new JSONObject();
                     try {
-                        if (user.geteMail() != null) contact.put("contact", user.geteMail());
+                        if (user.geteMail() != null)
+                            contact.put("contact", user.geteMail());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -190,7 +192,31 @@ public class ConnectionToServer extends AsyncTask<String, Void, String> {
                     connection.connect();
 
                     data = getConnectionData(connection);
-                    
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return data;
+            case "GET_USER_BY_ID":
+                try {
+                    String id = user.getId();
+                    String token = pocketDao.getUser().getToken();
+                    URL url = new URL(myUrl + "/v1/users/" + id);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    connection.setRequestProperty("Accept", "application/json");
+                    connection.setRequestProperty("Token", token);
+                    connection.connect();
+
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == 200) {
+                        data = getConnectionData(connection);
+                    } else if (responseCode == 404) {
+                        data = "User not found!";
+                    }
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
