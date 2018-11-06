@@ -17,6 +17,7 @@ import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.PocketDataBase;
 import com.gb.pocketmessenger.DataBase.UsersChatsTable;
 import com.gb.pocketmessenger.models.IncomingMessage;
+import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.services.PocketMessengerWssService;
 import com.gb.pocketmessenger.utils.JsonParser;
 
@@ -79,7 +80,10 @@ public class WssConnector {
                 if (jsonMsg != null) {
                     IncomingMessage message = JsonParser.getIncomingMessage(jsonMsg);
                     if (message.getServerResponse() != null) {
-                        Toast.makeText(context, "Сообщение отправлено", Toast.LENGTH_SHORT).show();
+                        if (message.getServerResponse().equals("200"))
+                            Toast.makeText(context, "Сообщение отправлено", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(context, "Ошибка отправки", Toast.LENGTH_SHORT).show();
                     } else {
                         if (listener != null)
                             listener.onIncomingMessage(message.getSenderid(), message.getMessage());
@@ -89,7 +93,6 @@ public class WssConnector {
                         String chatName  = null;
                         Log.d(TAG, "Incomming message: FROM = " + message.getSenderName() + " ID=" + Integer.valueOf(message.getSenderid()) + " TO = " + mPocketDao.getUser().getServerUserId() + " TEXT = " +
                                 message.getMessage());
-
 
                         for (int k = 0; k < mPocketDao.getChats().size(); k++) {
                             if (mPocketDao.getChats().get(k).getChatName().equals(message.getSenderName())) {
@@ -104,14 +107,17 @@ public class WssConnector {
                             }
                         }
 
-
                     if (chatName == null) {
 
                         Log.d(TAG, "New User!");
                         mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), message.getSenderName(), String.valueOf(new Date())));
                         mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
-                        //TODO надо получить email, и заменить в строке ниже вместо "xxx@xxx.xx".
-                        mPocketDao.insertContact(new ContactsTable(Integer.valueOf(message.getSenderid()), message.getSenderName(), "xxx@xxx.xx", false));
+
+                        User newUser = JsonParser.parseUser(RestUtils.getUserById(message.getSenderid(), mPocketDao));
+                        String email = newUser.geteMail();
+
+                        mPocketDao.insertContact(new ContactsTable(Integer.valueOf(message.getSenderid()), message.getSenderName(), email, false));
+
                         mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), Integer.valueOf(message.getSenderid()), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
                         mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
                                 Integer.valueOf(message.getSenderid()),
