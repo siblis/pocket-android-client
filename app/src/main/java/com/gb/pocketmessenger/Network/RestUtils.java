@@ -89,4 +89,20 @@ public class RestUtils {
         }
         return result;
     }
+
+    public static String getUserById(String id, PocketDao pocketDao){
+        String result = "";
+        User user = new User();
+        user.id = id;
+        ConnectionToServer connection = new ConnectionToServer("GET_USER_BY_ID", user, pocketDao);
+        connection.execute(CURRENT_SERVER);
+        try {
+            result = connection.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
