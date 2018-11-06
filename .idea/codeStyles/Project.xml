@@ -25,5 +25,8 @@
         <pair source="c" header="h" fileNamingConvention="NONE" />
       </extensions>
     </Objective-C-extensions>
+    <codeStyleSettings language="JAVA">
+      <option name="WRAP_ON_TYPING" value="0" />
+    </codeStyleSettings>
   </code_scheme>
 </component>
