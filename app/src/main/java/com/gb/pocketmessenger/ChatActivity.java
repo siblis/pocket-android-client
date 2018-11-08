@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.gb.pocketmessenger.Adapters.ChatsAdapter;
 import com.gb.pocketmessenger.Adapters.ContactsAdapter;
 import com.gb.pocketmessenger.DataBase.ChatsTable;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
@@ -45,7 +46,7 @@ import java.util.List;
 
 
 public class ChatActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, ContactsAdapter.OnItemClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ContactsAdapter.OnItemClickListener, ChatsAdapter.OnChatClickListener {
 
     private String mTime;
 
@@ -323,6 +324,7 @@ public class ChatActivity extends AppCompatActivity
                         mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getContacts().get(i).getId(), chatId, mTime));
                         contactIsFound = true;
                         Toast.makeText(ChatActivity.this, "User " + mPocketDao.getContacts().get(i).getUserName() + " added to chat", Toast.LENGTH_SHORT).show();
+                        //TODO Не обновляет список юзеров в ChatMessages до перезахода. Ошибка при отправке сообщения до перезахода и обновления списка юзеров в чате. Надо сделать автообновление списка после добавления нового.
                         addContactDialog.dismiss();
                     }
                 }
@@ -411,8 +413,11 @@ public class ChatActivity extends AppCompatActivity
                 Toast.makeText(this, "This is your contact. Select another user.", Toast.LENGTH_SHORT).show();
             }
         }
+    }
 
-
+    @Override
+    public void onChatClick(Integer chatId) {
+        setMessageScreen(String.valueOf(chatId));
     }
 
 
