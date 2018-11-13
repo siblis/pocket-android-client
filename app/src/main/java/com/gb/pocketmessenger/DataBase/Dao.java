@@ -7,6 +7,7 @@ import com.gb.pocketmessenger.models.IncomingMessage;
 import com.gb.pocketmessenger.models.Message;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.JsonParser;
+import com.gb.pocketmessenger.utils.TimeParser;
 
 import java.util.Date;
 
@@ -61,5 +62,28 @@ public class Dao {
         }
 
         return chatName;
+    }
+
+    public static void addNewUserChat(PocketDao pocketDao, int userId) {
+        mPocketDao = pocketDao;
+        mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mPocketDao.getOneContact(userId).getUserName(), TimeParser.getTime()));
+        mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), TimeParser.getTime()));
+        mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), userId, (mPocketDao.getChats().size() - 1), TimeParser.getTime()));
+    }
+
+    public static void addNewChatRoom(PocketDao pocketDao, String name) {
+        mPocketDao = pocketDao;
+        mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), name, TimeParser.getTime(),0));
+        mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), TimeParser.getTime()));
+    }
+
+    public static void clearDataBase(PocketDao pocketDao) {
+        mPocketDao = pocketDao;
+        mPocketDao.deleteUser(mPocketDao.getUser());
+        //TODO Переделать на RxJava2 чтобы не грузить UI поток
+        mPocketDao.clearUsersChatsTable();
+        mPocketDao.clearChatsTable();
+        mPocketDao.clearMessagesTable();
+        mPocketDao.clearContactsTable();
     }
 }

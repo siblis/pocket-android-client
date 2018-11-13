@@ -102,43 +102,9 @@ public class WssConnector {
                         Log.d(TAG, "Incomming message: FROM = " + message.getSenderName() + " ID=" + Integer.valueOf(message.getSenderid()) + " TO = " + mPocketDao.getUser().getServerUserId() + " TEXT = " +
                                 message.getMessage());
 
-                        //TODO Я бы всю эту работу с БД перенес в отдельный класс и коллбэком в этот класс передавал бы данные, которые нужны
-                        //TODO так мы отделим базу данных от вебсокет-соединения
-
-//                        String chatName = null;
                         String chatName = Dao.incommingMessage(mPocketDao, message);
-/*                        for (int k = 0; k < mPocketDao.getChats().size(); k++) {
-                            if (mPocketDao.getChats().get(k).getChatName().equals(message.getSenderName())) {
-                                chatName = mPocketDao.getChats().get(k).getChatName();
-                                Log.d(TAG, "Found Chat with name: " + mPocketDao.getChats().get(k).getChatName());
-                                mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
-                                        Integer.valueOf(message.getSenderid()),
-                                        mPocketDao.getUser().getServerUserId(),
-                                        message.getMessage(),
-                                        String.valueOf(new Date()),
-                                        mPocketDao.getChats().get(k).getId(), 0));
-                            }
-                        }
-*/
+
                         if (chatName == null) {
-/*
-                            Log.d(TAG, "New User!");
-                            mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), message.getSenderName(), String.valueOf(new Date())));
-                            mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
-
-                            User newUser = JsonParser.parseUser(RestUtils.getUserById(message.getSenderid(), mPocketDao));
-                            String email = newUser.geteMail();
-
-                            mPocketDao.insertContact(new ContactsTable(Integer.valueOf(message.getSenderid()), message.getSenderName(), email, false));
-
-                            mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), Integer.valueOf(message.getSenderid()), (mPocketDao.getChats().size() - 1), String.valueOf(new Date())));
-                            mPocketDao.insertMessage(new MessagesTable(mPocketDao.getMessages().size(),
-                                    Integer.valueOf(message.getSenderid()),
-                                    mPocketDao.getUser().getServerUserId(),
-                                    message.getMessage(),
-                                    String.valueOf(new Date()),
-                                    (mPocketDao.getChats().size() - 1), 0));
-*/
                             if (newContactListener != null)
                                 newContactListener.onUnknownContact();
                         }

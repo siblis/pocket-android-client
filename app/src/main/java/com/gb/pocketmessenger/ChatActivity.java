@@ -27,6 +27,7 @@ import com.gb.pocketmessenger.Adapters.ChatsAdapter;
 import com.gb.pocketmessenger.Adapters.ContactsAdapter;
 import com.gb.pocketmessenger.DataBase.ChatsTable;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
+import com.gb.pocketmessenger.DataBase.Dao;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UsersChatsTable;
 import com.gb.pocketmessenger.Network.RestUtils;
@@ -39,6 +40,7 @@ import com.gb.pocketmessenger.models.PocketContact;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.Correct;
 import com.gb.pocketmessenger.utils.JsonParser;
+import com.gb.pocketmessenger.utils.TimeParser;
 
 import java.util.Date;
 import java.util.Calendar;
@@ -233,12 +235,7 @@ public class ChatActivity extends AppCompatActivity
 
     private void logout() {
         if (mPocketDao.getUser() != null) {
-            mPocketDao.deleteUser(mPocketDao.getUser());
-            //TODO Переделать на RxJava2 чтобы не грузить UI поток
-            mPocketDao.clearUsersChatsTable();
-            mPocketDao.clearChatsTable();
-            mPocketDao.clearMessagesTable();
-            mPocketDao.clearContactsTable();
+            Dao.clearDataBase(mPocketDao);
         }
         super.onBackPressed();
 
@@ -291,9 +288,7 @@ public class ChatActivity extends AppCompatActivity
 
         mAddChatRoomBtn.setOnClickListener(v -> {
             if (!mChatRoomName.getText().toString().isEmpty()) {
-                mTime = getTime();
-                mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mChatRoomName.getText().toString(), mTime,0));
-                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), mTime));
+                Dao.addNewChatRoom(mPocketDao, mChatRoomName.getText().toString());
                 Toast.makeText(ChatActivity.this, "ChatRoom successfully created at: " + mTime, Toast.LENGTH_SHORT).show();
                 if (contactAddListener != null) chatAddListener.onNewChatAdded();
                 addChatRoomDialog.dismiss();
@@ -340,16 +335,6 @@ public class ChatActivity extends AppCompatActivity
         addContactDialog.show();
     }
 
-    private String getTime() {
-        Date currentTime = Calendar.getInstance().getTime();
-        String time = (currentTime.getHours() + 1) + ":"
-                + (currentTime.getMinutes() + 1) + ":"
-                + (currentTime.getSeconds() + 1) + " "
-                + currentTime.getDate() + "."
-                + (currentTime.getMonth() + 1) + "."
-                + (currentTime.getYear() + 1900);
-        return time;
-    }
 
     public int getVisibleFragment() {
 
@@ -391,7 +376,7 @@ public class ChatActivity extends AppCompatActivity
         String mContactName = mPocketDao.getOneContact(userId).getUserName();
         Toast.makeText(this, "Contact's ID: " + userId + " Name: " + mContactName, Toast.LENGTH_SHORT).show();
 
-        mTime = getTime();
+        mTime = TimeParser.getTime();
 
         try {
             ChatsTable mChat = mPocketDao.getChatWithName(mContactName);
@@ -402,9 +387,7 @@ public class ChatActivity extends AppCompatActivity
             e.printStackTrace();
             Log.d(TAG, "onChatGet: NO CHAT!");
             if (mPocketDao.getUser().getServerUserId() != userId) {
-                mPocketDao.insertChat(new ChatsTable(mPocketDao.getChats().size(), mContactName, mTime));
-                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), mPocketDao.getUser().getServerUserId(), (mPocketDao.getChats().size() - 1), mTime));
-                mPocketDao.setOneLinkUserToChat(new UsersChatsTable(mPocketDao.getLinks().size(), userId, (mPocketDao.getChats().size() - 1), mTime));
+                Dao.addNewUserChat(mPocketDao, userId);
                 if (contactAddListener != null) chatAddListener.onNewChatAdded();
                 setMessageScreen(String.valueOf((mPocketDao.getChats().size() - 1)));
                 setAddUserVisible(true);
