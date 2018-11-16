@@ -13,6 +13,7 @@
     <color name="green">#08af05</color>
     <color name="main_theme_blue">#2A82BC</color>
     <color name="hint_text_dark">#37474F</color>
+    <color name="black">#000</color>
 
 
 </resources>
