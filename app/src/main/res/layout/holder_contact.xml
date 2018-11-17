@@ -14,68 +14,50 @@
         android:background="@android:color/white"
         android:baselineAligned="false"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:paddingStart="16dp"
+        android:padding="8dp"
+        android:paddingLeft="16dp">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_weight="3"
-            android:background="@color/main_theme_blue"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingLeft="10dp"
-            android:paddingTop="20dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="20dp">
+
 
             <ImageView
                 android:id="@+id/img"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_contact_pic" />
-
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/bg_contact" />
 
 
-        </LinearLayout>
 
         <RelativeLayout
             android:id="@+id/rel"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingStart="15dp"
-            android:paddingLeft="15dp"
-            android:paddingTop="10dp"
+            android:paddingStart="16dp"
+            android:paddingLeft="16dp"
+            android:paddingTop="0dp"
             android:paddingEnd="10dp"
             android:paddingRight="20dp"
-            android:paddingBottom="10dp">
+            android:paddingBottom="0dp">
 
             <TextView
                 android:id="@+id/tv_contact_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-5dp"
+                android:layout_marginTop="0dp"
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
                 android:singleLine="true"
                 android:text="Name: "
-                android:textColor="@android:color/holo_blue_dark"
-                android:textSize="26sp" />
+                android:textColor="#000"
+                android:textSize="16sp" />
 
             <ImageView
                 android:id="@+id/title_from_to_dots_divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_below="@id/tv_contact_name"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="2dp"
                 android:layout_marginBottom="5dp" />
 
             <TextView
@@ -89,8 +71,8 @@
                 android:maxLines="5"
                 android:singleLine="false"
                 android:text="Email: "
-                android:textColor="@android:color/black"
-                android:textSize="20sp" />
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12sp" />
 
         </RelativeLayout>
     </LinearLayout>
