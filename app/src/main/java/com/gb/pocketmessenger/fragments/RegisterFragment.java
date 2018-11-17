@@ -65,6 +65,7 @@ public class RegisterFragment extends Fragment {
         registerButton = view.findViewById(R.id.register_ok_button);
         cancelButton = view.findViewById(R.id.register_cancel_button);
 
+
         loginEditText.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 if (Correct.containsWhiteSpace(loginEditText.getText().toString()) || loginEditText.getText().toString().length() == 0)

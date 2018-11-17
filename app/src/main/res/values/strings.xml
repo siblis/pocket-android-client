@@ -14,7 +14,7 @@
     <string name="hint_login">Логин / Email</string>
     <string name="hint_password">Пароль</string>
     <string name="hint_repassword">Повторите пароль</string>
-    <string name="button_login">LOG IN</string>
+    <string name="button_login">Войти</string>
     <string name="button_register">NEW USER</string>
     <string name="button_newuser">CREATE</string>
 
@@ -27,7 +27,7 @@
     <string name="hint_enter_a_message">Введите сообщение</string>
     <string name="enter_login">Введие логин</string>
     <string name="enter_password">Введие пароль</string>
-    <string name="register">Регистрация</string>
+    <string name="register">Зарегистрироваться</string>
     <string name="cancel">Отмена</string>
     <string name="enter_email">Введите e-mail</string>
     <string name="chat_fragment">chat_fragment</string>

@@ -4,62 +4,124 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/main_theme_blue"
     tools:context=".fragments.RegisterFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <ImageView
+        android:id="@+id/image_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:src="@drawable/bg_registration_logo"
+        android:layout_marginTop="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+
     <EditText
         android:id="@+id/login_edittext"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_rec_white"
+        android:textColor="@color/black"
+        android:textColorHint="@color/main_theme_blue"
+        android:layout_marginTop="30dp"
+        android:padding="5dp"
+        android:textSize="16dp"
+        android:textStyle="italic"
+        android:ems="10"
         android:imeOptions="actionDone"
         android:inputType="text"
-        android:hint="@string/enter_login" />
+        android:hint="@string/enter_login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image_logo"/>
 
     <TextView
         android:id="@+id/login_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/login_edittext"
         tools:text="login"/>
 
     <EditText
         android:id="@+id/password_edittext"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_rec_white"
+        android:textColor="@color/black"
+        android:textColorHint="@color/main_theme_blue"
+        android:layout_marginTop="10dp"
+        android:padding="5dp"
+        android:textSize="16dp"
+        android:textStyle="italic"
+        android:ems="10"
+        android:imeOptions="actionDone"
+        android:inputType="text"
         android:hint="@string/enter_password"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/login_text" />
 
     <TextView
         android:id="@+id/password_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/password_edittext"
         tools:text="password"/>
 
     <EditText
         android:id="@+id/email_edittext"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_rec_white"
+        android:textColor="@color/black"
+        android:textColorHint="@color/main_theme_blue"
+        android:layout_marginTop="10dp"
+        android:padding="5dp"
+        android:textSize="16dp"
+        android:textStyle="italic"
+        android:ems="10"
+        android:imeOptions="actionDone"
+        android:inputType="text"
         android:hint="@string/enter_email"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/password_text" />
 
     <TextView
         android:id="@+id/email_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/email_edittext"
         tools:text="email"/>
 
     <Button
         android:id="@+id/register_ok_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_rec_yellow"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:textSize="16dp"
+        android:padding="5dp"
+        android:textColor="@color/black"
         android:text="@string/register"
-        app:layout_constraintEnd_toStartOf="@id/register_cancel_button"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/email_text" />
 
     <Button
+        android:visibility="gone"
         android:id="@+id/register_cancel_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -70,8 +132,11 @@
 
     <TextView
         android:id="@+id/server_response"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/register_cancel_button" />
+        tools:text="Server response"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/register_ok_button" />
 
 </android.support.constraint.ConstraintLayout>
