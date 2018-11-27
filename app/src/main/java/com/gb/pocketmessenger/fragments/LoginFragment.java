@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -25,12 +26,17 @@ import com.gb.pocketmessenger.AppDelegate;
 import com.gb.pocketmessenger.DataBase.ContactsTable;
 import com.gb.pocketmessenger.DataBase.PocketDao;
 import com.gb.pocketmessenger.DataBase.UserTable;
+import com.gb.pocketmessenger.MainActivity;
 import com.gb.pocketmessenger.Network.ConnectionToServer;
 import com.gb.pocketmessenger.Network.RestUtils;
 import com.gb.pocketmessenger.Network.WssConnector;
 import com.gb.pocketmessenger.R;
 import com.gb.pocketmessenger.models.User;
 import com.gb.pocketmessenger.utils.JsonParser;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +80,7 @@ public class LoginFragment extends Fragment {
         mPrefs = getContext().getSharedPreferences("com.gb.pocketmessenger.PREFERENCE", getContext().MODE_PRIVATE);
         mPocketDao = ((AppDelegate) Objects.requireNonNull(getActivity()).getApplicationContext()).getPocketDatabase().getPocketDao();
         connector = WssConnector.getInstance();
+
         view.findViewById(R.id.button_register).setOnClickListener(v -> loadRegisterFragment());
 
 
@@ -87,7 +94,8 @@ public class LoginFragment extends Fragment {
                     + "EMAIL: " + mPocketDao.getUser().getEmail()
                     + "\nTOKEN: " + mPocketDao.getUser().getToken()
                     + "\nSERVER_USER_ID: " + mPocketDao.getUser().getServerUserId());
-        } else Log.d(TAG, "USER: Empty");
+        } else
+            Log.d(TAG, "USER: Empty");
 
         for (int i = 0; i < mPocketDao.getContacts().size(); i++) {
             Log.d(TAG, "DataBase Contact " + i + ": id=" + mPocketDao.getContacts().get(i).getId()
@@ -111,6 +119,7 @@ public class LoginFragment extends Fragment {
                 mUserId = login.getText().toString();
                 mUserPass = password.getText().toString();
                 authentication(mUserId, mUserPass);
+                getFirebaseToken();
             });
             view.findViewById(R.id.button_register).setOnClickListener(v -> loadRegisterFragment());
             mUserId = login.getText().toString();
@@ -118,9 +127,22 @@ public class LoginFragment extends Fragment {
 
         } else {
             authentication(mUserId, mUserPass);
+            getFirebaseToken();
         }
 
         return view;
+    }
+
+    private void getFirebaseToken() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w(TAG, "getInstanceId failed", task.getException());
+                        return;
+                    }
+                    String token = task.getResult().getToken();
+
+                });
     }
 
     //TODO REFACTOR
@@ -131,7 +153,8 @@ public class LoginFragment extends Fragment {
         if (token != null) {
 
             user.setToken(token);
-            connector.bindWss(token);
+            connector.startService(token);
+            connector.bindWss();
 
             User inServerUser = RestUtils.getUserInfo(user, mPocketDao);
 
@@ -176,7 +199,8 @@ public class LoginFragment extends Fragment {
             mUserPass = mPocketDao.getUser().getPassword();
             mUserId = decrypt(mUserId);
             mUserPass = decrypt(mUserPass);
-        } else Log.d(TAG, "loadUser: ERROR, NO USER!");
+        } else
+            Log.d(TAG, "loadUser: ERROR, NO USER!");
     }
 
     // Для LOGOUT!

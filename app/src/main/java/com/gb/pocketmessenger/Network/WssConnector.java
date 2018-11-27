@@ -69,14 +69,6 @@ public class WssConnector {
         WssConnector.listener = listener;
     }
 
-    public void setOnUnknownContactListener(OnUnknownContact newContactListener) {
-        WssConnector.newContactListener = newContactListener;
-    }
-
-    public void setOnWssConnectedListener(OnWssConnected wssListener) {
-        WssConnector.wssListener = wssListener;
-    }
-
     public static WssConnector getInstance() {
         return connector;
     }
@@ -113,20 +105,23 @@ public class WssConnector {
                     }
                 }
             }
-        }
+        };
 
-        ;
         IntentFilter intentFilter = new IntentFilter(WEBSOCKET_MESSAGE_TAG);
         context.registerReceiver(messageReceiver, intentFilter);
     }
 
-    public void bindWss(String token) {
+    public void startService(String token){
         intent = new Intent(context, PocketMessengerWssService.class);
         intent.putExtra(TOKEN_INTENT, token);
+        context.startService(intent);
+    }
+
+    public void bindWss() {
+        intent = new Intent(context, PocketMessengerWssService.class);
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                isServiceConnected = true;
                 wssService = ((PocketMessengerWssService.MyBinder) service).getService();
                 if (wssListener != null)
                     wssListener.onWssConnected();
@@ -135,15 +130,14 @@ public class WssConnector {
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 Toast.makeText(context, "Wss Service Stopped", Toast.LENGTH_SHORT).show();
-                isServiceConnected = false;
             }
 
             @Override
             public void onBindingDied(ComponentName name) {
                 Toast.makeText(context, "Wss Service Broken", Toast.LENGTH_SHORT).show();
-                isServiceConnected = false;
             }
         };
+
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
