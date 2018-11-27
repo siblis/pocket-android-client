@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "453828144381",
+    "firebase_url": "https://pocket-android-client.firebaseio.com",
+    "project_id": "pocket-android-client",
+    "storage_bucket": "pocket-android-client.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453828144381:android:6ed5bbfa84fe840e",
+        "android_client_info": {
+          "package_name": "com.gb.pocketmessenger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "453828144381-p56llnfeiob8mk5su0dec16jvntiu07s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gb.pocketmessenger",
+            "certificate_hash": "419f4af5926b2a1dd568a101263d5ecac77d01c4"
+          }
+        },
+        {
+          "client_id": "453828144381-583bgbmg65880l2ijdgai3fbhne7k74f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq6C_q60ruNhBCJAbAeKpK-AZ4F25mhcg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "453828144381-583bgbmg65880l2ijdgai3fbhne7k74f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
